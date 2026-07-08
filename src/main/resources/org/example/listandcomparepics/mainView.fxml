@@ -5,12 +5,23 @@
 <?import javafx.scene.layout.VBox?>
 
 <?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="org.example.listandcomparepics.HelloController">
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ListView?>
+<VBox fx:id="root" alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.listandcomparepics.Controller">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
     </padding>
 
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
+    <Button fx:id="dirBrowser" text="Directory Browser"
+            onAction="#onDirBrowserClick"/>
+    <Label fx:id="dirChosen"/>
+
+    <TextField fx:id="textRegEx"/>
+
+    <ListView fx:id="fileListView" prefWidth="200">
+
+    </ListView>
+
+
 </VBox>
