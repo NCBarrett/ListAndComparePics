@@ -1,8 +1,6 @@
 package org.example.listandcomparepics;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
@@ -11,22 +9,16 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class Controller implements WatchDirCallBack {
+public class Controller {
 
-    private DirectoryModel watcherMgr;
+    private DirectoryWatcherService watcherMgr;
 
     @FXML public Label dirChosen;
 
-    //@FXML public ListView<String> fileListView = new ListView<>();
-    @FXML public ListView<File> fileListView = new ListView<>();
+    @FXML public ListView<String> fileListView = new ListView<>();
+//    @FXML public ListView<File> fileListView = new ListView<>();
 
     @FXML public Button dirBrowser;
 
@@ -34,56 +26,55 @@ public class Controller implements WatchDirCallBack {
 
     @FXML public VBox root;
 
-//    List<String> fileList = new ArrayList<>();
-//    String dirPath;
-    ObservableList<File> fileObservableList = FXCollections.observableArrayList();
 
-    @FXML public void initialize() {
-        fileListView.setPlaceholder(new Label("No Directory Selected"));
+    private DirectoryWatcherService watcherService;
+    private DirectoryListingService listingService;
+    private Path currentWatchDir;
+    private Stage stage;
+
+    public void initialize() {
+
+        this.watcherService = new DirectoryWatcherService();
+        this.listingService = new DirectoryListingService();
     }
 
-    @Override
-    @FXML public void onDirBrowserClick(ActionEvent event) throws IOException {
-        DirectoryChooser dC = new DirectoryChooser();
-        dC.setInitialDirectory(new File(System.getProperty("user.home")));
-        dC.setTitle("Select Directory");
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
 
-        Stage stage = (Stage) dirBrowser.getScene().getWindow();
-        File selectedDir = dC.showDialog(stage);
+    @FXML
+    private void onDirBrowserClick() {
+        DirectoryChooser dirChooser = new DirectoryChooser();
+        dirChooser.setTitle("Select Directory");
 
+        File selectedDir = dirChooser.showDialog(stage);
         if (selectedDir != null) {
-            String strPath = selectedDir.getAbsolutePath();
-            dirChosen.setText(strPath);
-            Path dirPath = Paths.get(strPath);
+            dirChosen.setText(selectedDir.getAbsolutePath());
+            currentWatchDir = selectedDir.toPath();
 
-            File[] files = dirPath.toFile().listFiles();
+            /// 1. Refresh List
+            refreshListView();
 
-            fileObservableList =
-                    FXCollections.observableArrayList(files);
-
-            fileListView.setCellFactory(param -> new ListCell<File>() {
-                @Override
-                protected void updateItem(File item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty || item == null) {
-                        setText(null);
-                    } else  {
-                        setText(item.getName());
-                    }
-                }
-            });
-        } else {
-            dirChosen.setText("Directory Not Selected");
+            /// 2. Start watching directory for changes
+            try {
+                watcherService.startWatching(currentWatchDir, this::refreshListView);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    private void refreshListView() {
+        if (currentWatchDir != null) {
+            /// Update the ListView items
+            fileListView.setItems(listingService.getDirectoryListing(currentWatchDir));
+        }
+    }
+
+    private void shutdown() {
+        watcherService.stopWatching();
     }
 }
 
-// use Files.walk(...) to include subdirectories
-//            try (Stream<Path> paths = Files.list(dirPath)) {
-//List<File> files = paths
-//        .filter(Files::isRegularFile)
-//        .map(Path::toFile)
-//        .toList();
-//            } catch (IOException e) {
-//        e.printStackTrace();
-//            }
+//        fileListView.setPlaceholder(new Label("No Directory Selected"));
+//    ObservableList<File> fileObservableList = FXCollections.observableArrayList();
