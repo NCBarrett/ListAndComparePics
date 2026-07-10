@@ -12,9 +12,17 @@ public class Main extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(
                 Main.class.getResource("mainView.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 700, 700);
+        Scene scene = new Scene(fxmlLoader.load());
+
+        Controller controller = fxmlLoader.getController();
+        controller.setStage(stage);
+
         stage.setTitle("List And Compare Pics");
         stage.setScene(scene);
+
+        stage.setOnCloseRequest(event -> {
+            controller.shutdown();});
+
         stage.show();
     }
 }
