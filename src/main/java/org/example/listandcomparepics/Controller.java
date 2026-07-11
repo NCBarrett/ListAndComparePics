@@ -3,7 +3,10 @@ package org.example.listandcomparepics;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -13,21 +16,26 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class Controller {
 
-    private DirectoryWatcherService watcherMgr;
+    @FXML public Button dirBrowser;
+
+    @FXML public HBox choiceGrpContainer;
 
     @FXML public ImageView imageViewer;
 
     @FXML public Label dirChosen;
 
     @FXML public ListView<String> fileListView = new ListView<>();
-//    @FXML public ListView<File> fileListView = new ListView<>();
 
-    @FXML public Button dirBrowser;
+    @FXML public StackPane imageContainer;
 
     @FXML public TextField textRegEx;
+    @FXML public TextField fileName;
+
+    @FXML public ToggleGroup actionChoiceGroup;
 
     @FXML public VBox root;
 
@@ -40,6 +48,17 @@ public class Controller {
 
         this.watcherService = new DirectoryWatcherService();
         this.listingService = new DirectoryListingService();
+
+        fileListView.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue,
+                 newValue) -> {
+                    if (newValue != null) {
+                        loadImage(newValue);
+                        fileName.setText(newValue);
+                    }
+        });
+
+        choiceGrpContainer.setDisable(true);
     }
 
     public void setStage(Stage stage) {
@@ -53,6 +72,7 @@ public class Controller {
 
         File selectedDir = dirChooser.showDialog(stage);
         if (selectedDir != null) {
+
             dirChosen.setText(selectedDir.getAbsolutePath());
             currentWatchDir = selectedDir.toPath();
 
@@ -95,6 +115,23 @@ public class Controller {
             }
         }
 
-        fileListView.setPrefWidth(maxWidth + 40);
+//        System.out.println("maxWidth: " + maxWidth);
+        fileListView.setPrefWidth(300); // 400
+    }
+
+    private void loadImage(String filename) {
+        /// Suggested by IDE
+        File imageFile = new File(currentWatchDir.toString(), filename);
+        System.out.println("Path = " + imageFile.getAbsolutePath());
+
+        try {
+            /// Load the image securely using getResourceAsStream
+            Image image = new Image(imageFile.toURI().toString());
+            /// imageViewer.setImage(image); DOES NOT bind the image
+            imageViewer.imageProperty().set(image);
+        } catch (Exception e) {
+            System.err.println("Error loading image: " + filename);
+            imageViewer.imageProperty().set(null);
+        }
     }
 }

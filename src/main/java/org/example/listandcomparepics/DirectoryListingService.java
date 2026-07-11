@@ -17,6 +17,7 @@ public class DirectoryListingService {
             return list;
         }
 
+        // Add RegEx filter here
         /// Try-with-resources safely closes the operating system stream
         try (Stream<Path> stream = Files.list(dir)) {
             list.addAll(stream

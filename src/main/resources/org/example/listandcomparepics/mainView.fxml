@@ -9,6 +9,9 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.RadioButton?>
 <VBox fx:id="root" alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="org.example.listandcomparepics.Controller">
     <padding>
@@ -19,13 +22,32 @@
             onAction="#onDirBrowserClick"/>
     <Label fx:id="dirChosen"/>
 
-    <TextField fx:id="textRegEx"/>
+    <TextField fx:id="textRegEx" promptText="Enter RegEx"/>
 
     <HBox>
-        <ListView fx:id="fileListView">
+        <!-- ListView will take remaining space and never get covered -->
+        <ListView fx:id="fileListView" HBox.hgrow="ALWAYS"/>
 
-        </ListView>
-        <ImageView fx:id="imageViewer"/>
+        <!-- StackPane keeps the ImageView centered and clips overflow -->
+        <StackPane fx:id="imageContainer" prefWidth="500" prefHeight="500">
+            <!-- HBox.hgrow="ALWAYS"-->
+            <ImageView fx:id="imageViewer" fitWidth="500" fitHeight="500"
+                       preserveRatio="true"/>
+        </StackPane>
+
+    </HBox>
+
+    <HBox fx:id="choiceGrpContainer">
+        <fx:define>
+            <ToggleGroup fx:id="actionChoiceGroup"/>
+        </fx:define>
+
+        <RadioButton text="Rename: " toggleGroup="$actionChoiceGroup"/>
+        <RadioButton text="Move" toggleGroup="$actionChoiceGroup"/>
+
+        <TextField fx:id="fileName">
+
+        </TextField>
     </HBox>
 
 </VBox>
