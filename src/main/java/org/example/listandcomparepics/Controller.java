@@ -21,8 +21,9 @@ import java.util.Objects;
 public class Controller {
 
     @FXML public Button dirBrowser;
+    @FXML public Button submitBtn;
 
-    @FXML public HBox choiceGrpContainer;
+    public HBox renameBtnBox;
 
     @FXML public ImageView imageViewer;
 
@@ -38,6 +39,7 @@ public class Controller {
     @FXML public ToggleGroup actionChoiceGroup;
 
     @FXML public VBox root;
+    @FXML public VBox choiceGrpContainer;
 
     private DirectoryWatcherService watcherService;
     private DirectoryListingService listingService;
@@ -55,7 +57,15 @@ public class Controller {
                     if (newValue != null) {
                         loadImage(newValue);
                         fileName.setText(newValue);
+                        choiceGrpContainer.setDisable(false);
+                    } else  {
+                        choiceGrpContainer.setDisable(true);
                     }
+        });
+
+        textRegEx.textProperty().addListener((
+                observable, oldValue, newValue)
+                -> {refreshListView();
         });
 
         choiceGrpContainer.setDisable(true);
@@ -93,7 +103,8 @@ public class Controller {
     private void refreshListView() {
         if (currentWatchDir != null) {
             /// Update the ListView items
-            fileListView.setItems(listingService.getDirectoryListing(currentWatchDir));
+            fileListView.setItems(listingService.getDirectoryListing(
+                    currentWatchDir, textRegEx.getText()));
             resizeListViewToContent();
         }
     }

@@ -22,32 +22,38 @@
             onAction="#onDirBrowserClick"/>
     <Label fx:id="dirChosen"/>
 
-    <TextField fx:id="textRegEx" promptText="Enter RegEx"/>
+    <VBox spacing="10">
+        <TextField fx:id="textRegEx" promptText="Enter RegEx" maxWidth="300"/>
 
-    <HBox>
-        <!-- ListView will take remaining space and never get covered -->
-        <ListView fx:id="fileListView" HBox.hgrow="ALWAYS"/>
+        <HBox>
+            <!-- ListView will take remaining space and never get covered -->
+            <ListView fx:id="fileListView" HBox.hgrow="ALWAYS"/>
 
-        <!-- StackPane keeps the ImageView centered and clips overflow -->
-        <StackPane fx:id="imageContainer" prefWidth="500" prefHeight="500">
-            <!-- HBox.hgrow="ALWAYS"-->
-            <ImageView fx:id="imageViewer" fitWidth="500" fitHeight="500"
-                       preserveRatio="true"/>
-        </StackPane>
+            <!-- StackPane keeps the ImageView centered and clips overflow -->
+            <StackPane fx:id="imageContainer" prefWidth="500" prefHeight="500">
+                <!-- HBox.hgrow="ALWAYS"-->
+                <ImageView fx:id="imageViewer" fitWidth="500" fitHeight="500"
+                           preserveRatio="true"/>
+            </StackPane>
+        </HBox>
 
-    </HBox>
+        <HBox alignment="BASELINE_CENTER" maxWidth="300" style="-fx-border-color: black"
+            spacing="10">
+            <VBox fx:id="choiceGrpContainer">
+                <fx:define>
+                    <ToggleGroup fx:id="actionChoiceGroup"/>
+                </fx:define>
 
-    <HBox fx:id="choiceGrpContainer">
-        <fx:define>
-            <ToggleGroup fx:id="actionChoiceGroup"/>
-        </fx:define>
+                <HBox fx:id="renameBtnBox" alignment="BASELINE_LEFT">
+                    <RadioButton text="Rename: " toggleGroup="$actionChoiceGroup"/>
+                    <TextField fx:id="fileName"/>
+                </HBox>
 
-        <RadioButton text="Rename: " toggleGroup="$actionChoiceGroup"/>
-        <RadioButton text="Move" toggleGroup="$actionChoiceGroup"/>
+                <RadioButton text="Move" toggleGroup="$actionChoiceGroup"/>
 
-        <TextField fx:id="fileName">
-
-        </TextField>
-    </HBox>
+            </VBox>
+            <Button fx:id="submitBtn" text="Submit"/>
+        </HBox>
+    </VBox>
 
 </VBox>
