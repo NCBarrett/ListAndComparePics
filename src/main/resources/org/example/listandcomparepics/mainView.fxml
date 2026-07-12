@@ -13,57 +13,83 @@
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.control.RadioButton?>
 
-<VBox fx:id="root" alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
+<HBox fx:id="root" xmlns:fx="http://javafx.com/fxml"
       fx:controller="org.example.listandcomparepics.Controller">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
+    <VBox fx:id="leftPane" alignment="CENTER" spacing="20.0" >
+        <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+        </padding>
 
-    <VBox spacing="10" > <!--maxWidth="900" -->
+        <VBox spacing="10" > <!--maxWidth="900" -->
 
-        <Button fx:id="dirBrowser" text="Directory Browser"
-                onAction="#onDirBrowserClick"/>
-        <Label fx:id="dirChosen"/>
-        <TextField fx:id="textRegEx" promptText="Enter RegEx" maxWidth="250"/>
+            <Button fx:id="dirBrowser" text="Directory Browser"
+                    onAction="#onDirBrowserClick"/>
+            <Label fx:id="dirChosen"/>
+            <TextField fx:id="textRegEx" promptText="Enter RegEx" maxWidth="250"/>
 
-        <HBox >
-            <!-- ListView will take remaining space and never get covered -->
-            <ListView fx:id="fileListView" maxWidth="400"/>
+            <HBox >
+                <!-- ListView will take remaining space and never get covered -->
+                <ListView fx:id="fileListView" maxWidth="400"/>
 
-            <!-- StackPane keeps the ImageView centered and clips overflow -->
-            <StackPane fx:id="imageContainer" prefWidth="500" prefHeight="500">
-                <!-- HBox.hgrow="ALWAYS"-->
-                <ImageView fx:id="imageViewer" fitWidth="500" fitHeight="500"
-                           preserveRatio="true" style="-fx-border-color: red"/>
-            </StackPane>
-        </HBox>
+                <!-- StackPane keeps the ImageView centered and clips overflow -->
+                <StackPane fx:id="imageContainer" prefWidth="500" prefHeight="500">
+                    <!-- HBox.hgrow="ALWAYS"-->
+                    <ImageView fx:id="imageViewer" fitWidth="500" fitHeight="500"
+                               preserveRatio="true" style="-fx-border-color: red"/>
+                </StackPane>
+            </HBox>
 
-        <HBox alignment="CENTER" maxWidth="440"
-            spacing="10"> <!-- style="-fx-border-color: black"-->
-            <VBox fx:id="choiceGrpContainer" maxWidth="375" spacing="10"
-                  >
-                     <!-- style="-fx-border-color: red"-->
-                <fx:define>
-                    <ToggleGroup fx:id="actionChoiceGroup"/>
-                </fx:define>
+            <HBox alignment="CENTER" maxWidth="440"
+                  spacing="10"> <!-- style="-fx-border-color: black"-->
+                <VBox fx:id="choiceGrpContainer" maxWidth="375" spacing="10"
+                >
+                    <!-- style="-fx-border-color: red"-->
+                    <fx:define>
+                        <ToggleGroup fx:id="actionChoiceGroup"/>
+                    </fx:define>
 
-                <HBox fx:id="renameBtnBox" alignment="BASELINE_LEFT" prefWidth="400"
-                      >
+                    <HBox fx:id="renameBtnBox" alignment="BASELINE_LEFT" prefWidth="400"
+                    >
                         <!-- style="-fx-border-color: green" -->
-                    <RadioButton text="Rename: " toggleGroup="$actionChoiceGroup"/>
-                    <TextField fx:id="fileName" prefWidth="300"/>
-                </HBox>
+                        <RadioButton text="Rename: " toggleGroup="$actionChoiceGroup"/>
+                        <TextField fx:id="fileName" prefWidth="300"/>
+                    </HBox>
 
-                <HBox fx:id="moveBtnBox" alignment="BASELINE_LEFT" prefWidth="400"
-                      >
-                      <!-- style="-fx-border-color: blue" -->
-                    <RadioButton text="Move to: " toggleGroup="$actionChoiceGroup"/>
-                    <TextField fx:id="dirName" prefWidth="300"/>
-                </HBox>
+                    <HBox fx:id="moveBtnBox" alignment="BASELINE_LEFT" prefWidth="400"
+                    >
+                        <!-- style="-fx-border-color: blue" -->
+                        <RadioButton text="Move to: " toggleGroup="$actionChoiceGroup"/>
+                        <TextField fx:id="dirName" prefWidth="300"/>
+                    </HBox>
 
-            </VBox>
-            <Button fx:id="submitBtn" text="Submit"/>
-        </HBox>
+                </VBox>
+                <Button fx:id="submitBtn" text="Submit"/>
+            </HBox>
+        </VBox>
+
     </VBox>
 
-</VBox>
+    <VBox fx:id="rightPane" alignment="CENTER" spacing="20.0" >
+        <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+        </padding>
+
+        <VBox spacing="10">
+            <TextField fx:id="rtTextRegEx" promptText="Enter RegEx" maxWidth="250"/>
+
+            <HBox >
+                <!-- StackPane keeps the ImageView centered and clips overflow -->
+                <StackPane fx:id="rtImageContainer" prefWidth="500" prefHeight="500">
+                    <!-- HBox.hgrow="ALWAYS"-->
+                    <ImageView fx:id="rtImageViewer" fitWidth="500" fitHeight="500"
+                               preserveRatio="true" style="-fx-border-color: red"/>
+                </StackPane>
+
+                <!-- ListView will take remaining space and never get covered -->
+                <ListView fx:id="rtFileListView" maxWidth="400"/>
+            </HBox>
+        </VBox> <!--maxWidth="900" -->
+    </VBox>
+</HBox>
+
+

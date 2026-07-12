@@ -23,25 +23,31 @@ public class Controller {
     @FXML public Button dirBrowser;
     @FXML public Button submitBtn;
 
+    @FXML public HBox root;
     @FXML public HBox renameBtnBox;
     @FXML public HBox moveBtnBox;
 
     @FXML public ImageView imageViewer;
+    @FXML public ImageView rtImageViewer;
 
     @FXML public Label dirChosen;
 
     @FXML public ListView<String> fileListView = new ListView<>();
+    @FXML public ListView<String> rtFileListView = new ListView<>();
 
     @FXML public StackPane imageContainer;
+    @FXML public StackPane rtImageContainer;
 
     @FXML public TextField textRegEx;
     @FXML public TextField fileName;
     @FXML public TextField dirName;
+    @FXML public TextField rtTextRegEx;
 
     @FXML public ToggleGroup actionChoiceGroup;
 
-    @FXML public VBox root;
+    @FXML public VBox leftPane;
     @FXML public VBox choiceGrpContainer;
+    @FXML public VBox rightPane;
 
     private DirectoryWatcherService watcherService;
     private DirectoryListingService listingService;
