@@ -23,7 +23,8 @@ public class Controller {
     @FXML public Button dirBrowser;
     @FXML public Button submitBtn;
 
-    public HBox renameBtnBox;
+    @FXML public HBox renameBtnBox;
+    @FXML public HBox moveBtnBox;
 
     @FXML public ImageView imageViewer;
 
@@ -35,6 +36,7 @@ public class Controller {
 
     @FXML public TextField textRegEx;
     @FXML public TextField fileName;
+    @FXML public TextField dirName;
 
     @FXML public ToggleGroup actionChoiceGroup;
 
@@ -64,7 +66,8 @@ public class Controller {
         });
 
         textRegEx.textProperty().addListener((
-                observable, oldValue, newValue)
+                observable, oldValue,
+                newValue)
                 -> {refreshListView();
         });
 
@@ -105,29 +108,12 @@ public class Controller {
             /// Update the ListView items
             fileListView.setItems(listingService.getDirectoryListing(
                     currentWatchDir, textRegEx.getText()));
-            resizeListViewToContent();
+//            resizeListViewToContent();
         }
     }
 
     public void shutdown() {
         watcherService.stopWatching();
-    }
-
-    private void resizeListViewToContent() {
-        double maxWidth = 0;
-        Font font = Font.getDefault();
-
-        for (String item : fileListView.getItems()) {
-            Text text = new Text(item);
-            text.setFont(font);
-            double width = text.getLayoutBounds().getWidth();
-            if (width > maxWidth) {
-                maxWidth = width;
-            }
-        }
-
-//        System.out.println("maxWidth: " + maxWidth);
-        fileListView.setPrefWidth(300); // 400
     }
 
     private void loadImage(String filename) {
@@ -146,3 +132,21 @@ public class Controller {
         }
     }
 }
+
+//    private void resizeListViewToContent() {
+//        double maxWidth = 0;
+//        Font font = Font.getDefault();
+//
+//        for (String item : fileListView.getItems()) {
+//            Text text = new Text(item);
+//            text.setFont(font);
+//            double width = text.getLayoutBounds().getWidth();
+//            if (width > maxWidth) {
+//                maxWidth = width;
+//            }
+//        }
+//
+////        System.out.println("maxWidth: " + maxWidth);
+//        fileListView.setPrefWidth(300); // 400
+//
+//    }
