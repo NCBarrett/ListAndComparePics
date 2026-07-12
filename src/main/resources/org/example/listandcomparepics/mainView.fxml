@@ -71,7 +71,7 @@
                         </HBox>
 
                     </VBox>
-                    <Button fx:id="submitBtn" text="Submit"/>
+                    <Button fx:id="submitBtn" text="Submit" onAction="#submitButton"/>
                 </HBox>
             </VBox>
         </VBox>

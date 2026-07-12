@@ -1,6 +1,7 @@
 package org.example.listandcomparepics;
 
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -102,14 +103,14 @@ public class Controller {
                     if (newToggle != null) {
                         RadioButton selRadio =  (RadioButton) newToggle;
                         String selText = selRadio.getText();
-                        System.out.println("radioBtn = " + selText);
+//                        System.out.println("radioBtn = " + selText);
 
                         if (selText.equals("Rename: ")) {
-                            System.out.println("Rename");
+//                            System.out.println("Rename");
                             fileName.setDisable(false);
                             dirName.setDisable(true);
                         } else {
-                            System.out.println("Move to");
+//                            System.out.println("Move to");
                             dirName.setDisable(false);
                             fileName.setDisable(true);
                         }
@@ -182,6 +183,17 @@ public class Controller {
         } catch (Exception e) {
             System.err.println("Error loading image: " + filename);
             targetView.imageProperty().set(null);
+        }
+    }
+
+    public void submitButton(ActionEvent event) {
+        RadioButton selRadio = (RadioButton) actionChoiceGrp.getSelectedToggle();
+
+        if (selRadio.getText().equals("Rename: ")) {
+            System.out.println("Rename button selected");
+
+        } else {
+            System.out.println("Move button selected");
         }
     }
 }
