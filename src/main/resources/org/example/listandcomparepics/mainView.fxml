@@ -46,29 +46,31 @@
                     </StackPane>
                 </HBox>
 
-                <HBox alignment="CENTER" maxWidth="440"
-                      spacing="10"> <!-- style="-fx-border-color: black"-->
-                    <VBox fx:id="choiceGrpContainer" maxWidth="375" spacing="10"
-                    >
-                        <!-- style="-fx-border-color: red"-->
+                <HBox alignment="CENTER" maxWidth="650"
+                      spacing="10" style="-fx-border-color: black"> <!-- -->
+                    <VBox fx:id="choiceGrpContainer" spacing="10" prefWidth="575"
+                          style="-fx-border-color: red">
+                        <!-- maxWidth="900"-->
                         <fx:define>
                             <ToggleGroup fx:id="actionChoiceGrp"/>
                         </fx:define>
 
                         <HBox fx:id="renameBtnBox" alignment="BASELINE_LEFT"
-                              prefWidth="400"
+                              prefWidth="400" style="-fx-border-color: green"
                         >
-                            <!-- style="-fx-border-color: green" -->
+                            <!--  -->
                             <RadioButton text="Rename: " toggleGroup="$actionChoiceGrp"/>
                             <TextField fx:id="fileName" prefWidth="300"/>
                         </HBox>
 
-                        <HBox fx:id="moveBtnBox" alignment="BASELINE_LEFT" prefWidth="400"
-                        >
-                            <!-- style="-fx-border-color: blue" -->
-                            <RadioButton text="Move to: " toggleGroup="$actionChoiceGrp"/>
-                            <TextField fx:id="dirName" prefWidth="300"/>
-                            <Button fx:id="newDirBtn" text="Browse new Directory"/>
+                        <HBox fx:id="moveBtnBox" alignment="BASELINE_LEFT" prefWidth="250"
+                              style="-fx-border-color: blue" spacing="5">
+                            <!--  -->
+                            <RadioButton text="Move to: " toggleGroup="$actionChoiceGrp"
+                                prefWidth="175"/>
+                            <TextField fx:id="dirName" prefWidth="450"/>
+                            <Button fx:id="newDirBtn" text="Browse new Directory"
+                                prefWidth="240" onAction="#newDirBrowser"/>
                         </HBox>
 
                     </VBox>

@@ -198,7 +198,7 @@ public class Controller {
         RadioButton selRadio = (RadioButton) actionChoiceGrp.getSelectedToggle();
 
         if (selRadio.getText().equals("Rename: ")) {
-//            System.out.println("Rename button selected");
+            System.out.println("Rename button selected");
             String oldName = fileListView.getSelectionModel().getSelectedItem();
             Path sourcePath = currentWatchDir.resolve(oldName);
             Path destinationPath = currentWatchDir.resolve(fileName.getText());
@@ -207,9 +207,9 @@ public class Controller {
 //                    "; destinationPath = " + destinationPath);
 
             try {
+                // Case-only rename: go through a temp name first - NTFS issue
                 if (sourcePath.toString().equalsIgnoreCase(destinationPath.toString())
-                    && !sourcePath.toString().equals(destinationPath.toString())) {
-                    // Case-only rename: go through a temp name first - NTFS issue
+                        && !sourcePath.toString().equals(destinationPath.toString())) {
                     Path tempPath = currentWatchDir.resolve(oldName + "_tmp_rename");
                     Files.move(sourcePath, tempPath, StandardCopyOption.REPLACE_EXISTING);
                     Files.move(tempPath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
@@ -226,5 +226,15 @@ public class Controller {
         }
         refreshListView();
         imageViewer.setImage(null);
+    }
+
+    public void newDirBrowser(ActionEvent event) {
+        DirectoryChooser dirChooser = new DirectoryChooser();
+        dirChooser.setTitle("Select destination directory");
+
+        File destDir = dirChooser.showDialog(stage);
+        if (destDir != null) {
+            dirName.setText(destDir.getAbsolutePath());
+        }
     }
 }
