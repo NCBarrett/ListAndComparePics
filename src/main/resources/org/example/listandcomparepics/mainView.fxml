@@ -68,6 +68,7 @@
                             <!-- style="-fx-border-color: blue" -->
                             <RadioButton text="Move to: " toggleGroup="$actionChoiceGrp"/>
                             <TextField fx:id="dirName" prefWidth="300"/>
+                            <Button fx:id="newDirBtn" text="Browse new Directory"/>
                         </HBox>
 
                     </VBox>

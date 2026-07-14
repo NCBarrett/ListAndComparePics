@@ -16,13 +16,17 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 
 public class Controller {
 
     @FXML public Button dirBrowser;
     @FXML public Button submitBtn;
+    @FXML public Button newDirBtn;
 
     @FXML public HBox renameBtnBox;
     @FXML public HBox moveBtnBox;
@@ -58,6 +62,7 @@ public class Controller {
     private DirectoryListingService listingService;
     private Path currentWatchDir;
     private Stage stage;
+    private String strFileName;
 
     public void initialize() {
 
@@ -69,7 +74,7 @@ public class Controller {
                  newValue) -> {
                     if (newValue != null) {
                         loadImage(newValue, imageViewer);
-                        fileName.setText(newValue);
+                        strFileName = newValue;
                         choiceGrpContainer.setDisable(false);
                     } else  {
                         choiceGrpContainer.setDisable(true);
@@ -109,10 +114,13 @@ public class Controller {
 //                            System.out.println("Rename");
                             fileName.setDisable(false);
                             dirName.setDisable(true);
+                            fileName.setText(strFileName);
+                            newDirBtn.setDisable(true);
                         } else {
 //                            System.out.println("Move to");
                             dirName.setDisable(false);
                             fileName.setDisable(true);
+                            newDirBtn.setDisable(false);
                         }
                         submitBtn.setDisable(false);
                     }
@@ -123,6 +131,7 @@ public class Controller {
         fileName.setDisable(true);
         dirName.setDisable(true);
         submitBtn.setDisable(true);
+        newDirBtn.setDisable(true);
     }
 
     public void setStage(Stage stage) {
@@ -162,7 +171,6 @@ public class Controller {
             rtFileListView.setItems(listingService.getDirectoryListing(
                     currentWatchDir, rtTextRegEx.getText()
             ));
-//            resizeListViewToContent();
         }
     }
 
@@ -178,7 +186,7 @@ public class Controller {
         try {
             /// Load the image securely using getResourceAsStream
             Image image = new Image(imageFile.toURI().toString());
-            /// imageViewer.setImage(image); DOES NOT bind the image
+            /// imageViewer.setImage(image) DOES NOT bind the image
             targetView.imageProperty().set(image);
         } catch (Exception e) {
             System.err.println("Error loading image: " + filename);
@@ -190,10 +198,33 @@ public class Controller {
         RadioButton selRadio = (RadioButton) actionChoiceGrp.getSelectedToggle();
 
         if (selRadio.getText().equals("Rename: ")) {
-            System.out.println("Rename button selected");
+//            System.out.println("Rename button selected");
+            String oldName = fileListView.getSelectionModel().getSelectedItem();
+            Path sourcePath = currentWatchDir.resolve(oldName);
+            Path destinationPath = currentWatchDir.resolve(fileName.getText());
 
+//            System.out.println("sourcePath = " + sourcePath +
+//                    "; destinationPath = " + destinationPath);
+
+            try {
+                if (sourcePath.toString().equalsIgnoreCase(destinationPath.toString())
+                    && !sourcePath.toString().equals(destinationPath.toString())) {
+                    // Case-only rename: go through a temp name first - NTFS issue
+                    Path tempPath = currentWatchDir.resolve(oldName + "_tmp_rename");
+                    Files.move(sourcePath, tempPath, StandardCopyOption.REPLACE_EXISTING);
+                    Files.move(tempPath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+                } else {
+                    Files.move(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+                }
+//                System.out.println("File renamed successfully");
+            } catch (IOException e) {
+                System.err.println("Failed to rename file: " + e.getMessage());
+            }
         } else {
             System.out.println("Move button selected");
+
         }
+        refreshListView();
+        imageViewer.setImage(null);
     }
 }
