@@ -19,9 +19,10 @@
     <VBox fx:id="dirPane" alignment="CENTER" spacing="10">
         <Button fx:id="dirBrowser" text="Directory Browser"
                 onAction="#onDirBrowserClick"/>
-        <Label fx:id="dirChosen" style="-fx-border-color: black"
+        <Label fx:id="dirChosen"
                 minWidth="200"/>
     </VBox>
+<!-- style="-fx-border-color: black"    -->
 
     <HBox>
         <VBox fx:id="leftPane" alignment="CENTER" >
@@ -32,6 +33,8 @@
 
             <VBox spacing="10" > <!--maxWidth="900" -->
 
+                <TextField fx:id="RegEx" text="TEXT TO COPY: ^(?!Girl \d+(\s*\(\d+\))?).*"
+                           maxWidth="250"/>
                 <TextField fx:id="textRegEx" promptText="Enter RegEx" maxWidth="250"/>
 
                 <HBox >
@@ -42,30 +45,30 @@
                     <StackPane fx:id="imageContainer" prefWidth="500" prefHeight="500">
                         <!-- HBox.hgrow="ALWAYS"-->
                         <ImageView fx:id="imageViewer" fitWidth="500" fitHeight="500"
-                                   preserveRatio="true" style="-fx-border-color: red"/>
+                                   preserveRatio="true"/>
+<!--                         style="-fx-border-color: red"-->
                     </StackPane>
                 </HBox>
 
                 <HBox alignment="CENTER" maxWidth="650"
                       spacing="10" style="-fx-border-color: black"> <!-- -->
                     <VBox fx:id="choiceGrpContainer" spacing="10" prefWidth="575"
-                          style="-fx-border-color: red">
-                        <!-- maxWidth="900"-->
+                          >
+                        <!--style="-fx-border-color: red" maxWidth="900"-->
                         <fx:define>
                             <ToggleGroup fx:id="actionChoiceGrp"/>
                         </fx:define>
 
                         <HBox fx:id="renameBtnBox" alignment="BASELINE_LEFT"
-                              prefWidth="400" style="-fx-border-color: green"
-                        >
-                            <!--  -->
+                              prefWidth="400"                       >
+                            <!-- style="-fx-border-color: green"  -->
                             <RadioButton text="Rename: " toggleGroup="$actionChoiceGrp"/>
                             <TextField fx:id="fileName" prefWidth="300"/>
                         </HBox>
 
                         <HBox fx:id="moveBtnBox" alignment="BASELINE_LEFT" prefWidth="250"
-                              style="-fx-border-color: blue" spacing="5">
-                            <!--  -->
+                               spacing="5">
+                            <!--  style="-fx-border-color: blue"-->
                             <RadioButton text="Move to: " toggleGroup="$actionChoiceGrp"
                                 prefWidth="175"/>
                             <TextField fx:id="dirName" prefWidth="450"/>
@@ -85,6 +88,7 @@
             <padding>
                 <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
             </padding>
+                <TextField fx:id="RegEx2" text="TEXT TO COPY: ^Girl \d+(\s*\(\d+\))?" maxWidth="250"/>
                 <TextField fx:id="rtTextRegEx" promptText="Enter RegEx" maxWidth="250"/>
 
                 <HBox >

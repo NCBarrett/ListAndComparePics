@@ -57,6 +57,8 @@ public class Controller {
     @FXML public VBox rightPane;
     @FXML public VBox root;
     @FXML public VBox dirPane;
+    public TextField RegEx;
+    public TextField RegEx2;
 
     private DirectoryWatcherService watcherService;
     private DirectoryListingService listingService;
@@ -167,10 +169,9 @@ public class Controller {
         if (currentWatchDir != null) {
             /// Update the ListView items
             fileListView.setItems(listingService.getDirectoryListing(
-                    currentWatchDir, textRegEx.getText()));
-            rtFileListView.setItems(listingService.getDirectoryListing(
-                    currentWatchDir, rtTextRegEx.getText()
-            ));
+                    currentWatchDir, textRegEx.getText())); /// left side
+            rtFileListView.setItems(listingService.getDirectoryListing( /// right side
+                    currentWatchDir, rtTextRegEx.getText(), true));
         }
     }
 
@@ -189,7 +190,12 @@ public class Controller {
             /// imageViewer.setImage(image) DOES NOT bind the image
             targetView.imageProperty().set(image);
         } catch (Exception e) {
-            System.err.println("Error loading image: " + filename);
+//            System.err.println("Error loading image: " + filename);
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Image Load Error");
+            alert.setHeaderText("Failed to load image");
+            alert.setContentText("Error loading image: " + filename);
+            alert.showAndWait();
             targetView.imageProperty().set(null);
         }
     }
@@ -202,7 +208,6 @@ public class Controller {
             String oldName = fileListView.getSelectionModel().getSelectedItem();
             Path sourcePath = currentWatchDir.resolve(oldName);
             Path destinationPath = currentWatchDir.resolve(fileName.getText());
-
 //            System.out.println("sourcePath = " + sourcePath +
 //                    "; destinationPath = " + destinationPath);
 
@@ -218,11 +223,29 @@ public class Controller {
                 }
 //                System.out.println("File renamed successfully");
             } catch (IOException e) {
-                System.err.println("Failed to rename file: " + e.getMessage());
+//                System.err.println("File could not be renamed: " + e.getMessage());
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("File Rename Error");
+                alert.setHeaderText("Failed to rename file");
+                alert.setContentText("File could not be renamed: " + e.getMessage());
+                alert.showAndWait();
             }
+            fileName.clear();
         } else {
             System.out.println("Move button selected");
-
+            String name = fileListView.getSelectionModel().getSelectedItem();
+            Path sourcePath = currentWatchDir.resolve(name);
+            Path targetPath = Path.of(dirName.getText() + name);
+            try {
+                Files.move(sourcePath, targetPath, StandardCopyOption.ATOMIC_MOVE);
+            } catch (IOException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("File Move Error");
+                alert.setHeaderText("Failed to move file");
+                alert.setContentText("File could not be moved: " + e.getMessage());
+                alert.showAndWait();
+            }
+            dirName.clear();
         }
         refreshListView();
         imageViewer.setImage(null);
