@@ -1,6 +1,5 @@
 package org.example.listandcomparepics;
 
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -9,8 +8,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
@@ -18,9 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Objects;
 
 public class Controller {
 
@@ -57,8 +52,9 @@ public class Controller {
     @FXML public VBox rightPane;
     @FXML public VBox root;
     @FXML public VBox dirPane;
-    public TextField RegEx;
-    public TextField RegEx2;
+
+    @FXML public TextField RegEx;
+    @FXML public TextField RegEx2;
 
     private DirectoryWatcherService watcherService;
     private DirectoryListingService listingService;
@@ -78,6 +74,11 @@ public class Controller {
                         loadImage(newValue, imageViewer);
                         strFileName = newValue;
                         choiceGrpContainer.setDisable(false);
+                        RadioButton selRadio = (RadioButton)
+                                actionChoiceGrp.getSelectedToggle();
+                        if (selRadio != null && selRadio.getText().equals("Rename: ")) {
+                            fileName.setText(newValue);
+                        }
                     } else  {
                         choiceGrpContainer.setDisable(true);
                     }
@@ -247,8 +248,12 @@ public class Controller {
             }
             dirName.clear();
         }
+        actionChoiceGrp.selectToggle(null);
+        choiceGrpContainer.setDisable(true);
+        newDirBtn.setDisable(true);
         refreshListView();
         imageViewer.setImage(null);
+        submitBtn.setDisable(true);
     }
 
     public void newDirBrowser(ActionEvent event) {
