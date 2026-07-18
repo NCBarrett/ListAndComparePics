@@ -82,29 +82,35 @@
             </VBox>
         </VBox>
 
-        <VBox fx:id="rightPane" alignment="TOP_RIGHT" spacing="10.0"
-                > <!--            style="-fx-border-color: black"-->
+        <HBox>
+            <!-- StackPane keeps the ImageView centered and clips overflow -->
+            <StackPane fx:id="rtImageContainer" prefWidth="500" prefHeight="500">
+                <!-- HBox.hgrow="ALWAYS"-->
+                <ImageView fx:id="rtImageViewer" fitWidth="500" fitHeight="500"
+                           preserveRatio="true"  />
+                <!--            style="-fx-border-color: red"           -->
+            </StackPane>
+            <VBox fx:id="rightPane" alignment="TOP_RIGHT" spacing="10.0"
+                    > <!--            style="-fx-border-color: black"-->
 
-            <padding>
-                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-            </padding>
-                <TextField fx:id="RegEx2" text="TEXT TO COPY: ^Girl \d+(\s*\(\d+\))?" maxWidth="250"/>
-                <TextField fx:id="rtTextRegEx" promptText="Enter RegEx" maxWidth="250"/>
+                <padding>
+                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+                </padding>
+                    <TextField fx:id="RegEx2" text="TEXT TO COPY: ^Girl \d+(\s*\(\d+\))?" maxWidth="250"/>
+                    <TextField fx:id="rtTextRegEx" promptText="Enter RegEx" maxWidth="250"/>
 
-                <HBox >
-<!--                   style="-fx-border-color: red" -->
-                    <!-- StackPane keeps the ImageView centered and clips overflow -->
-                    <StackPane fx:id="rtImageContainer" prefWidth="500" prefHeight="500">
-                        <!-- HBox.hgrow="ALWAYS"-->
-                        <ImageView fx:id="rtImageViewer" fitWidth="500" fitHeight="500"
-                                   preserveRatio="true" />
-<!--                        style="-fx-border-color: red"-->
-                    </StackPane>
+                    <HBox alignment="TOP_CENTER" >
+    <!--                 style="-fx-border-color: red"   -->
+                        <!-- ListView will take remaining space and never get covered -->
+                        <VBox spacing="10">
+                            <ListView fx:id="rtFileListView" prefHeight="500"/>
+                            <!--                maxWidth="400"    -->
+                            <TextField fx:id="endFilePath"/>
+                        </VBox>
 
-                    <!-- ListView will take remaining space and never get covered -->
-                    <ListView fx:id="rtFileListView" maxWidth="400"/>
-                </HBox>
-        </VBox>
+                    </HBox>
+            </VBox>
+        </HBox>
     </HBox>
 </VBox>
 

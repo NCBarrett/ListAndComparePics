@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Controller {
 
@@ -55,6 +57,7 @@ public class Controller {
 
     @FXML public TextField RegEx;
     @FXML public TextField RegEx2;
+    @FXML public TextField endFilePath;
 
     private DirectoryWatcherService watcherService;
     private DirectoryListingService listingService;
@@ -117,12 +120,14 @@ public class Controller {
 //                            System.out.println("Rename");
                             fileName.setDisable(false);
                             dirName.setDisable(true);
+                            dirName.clear();
                             fileName.setText(strFileName);
                             newDirBtn.setDisable(true);
                         } else {
 //                            System.out.println("Move to");
                             dirName.setDisable(false);
                             fileName.setDisable(true);
+                            fileName.clear();
                             newDirBtn.setDisable(false);
                         }
                         submitBtn.setDisable(false);
@@ -171,8 +176,14 @@ public class Controller {
             /// Update the ListView items
             fileListView.setItems(listingService.getDirectoryListing(
                     currentWatchDir, textRegEx.getText())); /// left side
-            rtFileListView.setItems(listingService.getDirectoryListing( /// right side
-                    currentWatchDir, rtTextRegEx.getText(), true));
+
+            var rtItems = listingService.getDirectoryListing(
+                    currentWatchDir, rtTextRegEx.getText(), true);
+            rtFileListView.setItems(rtItems);
+
+            if (!rtItems.isEmpty()) {
+                rtFileListView.scrollTo(rtItems.size());
+            }
         }
     }
 
@@ -183,7 +194,7 @@ public class Controller {
     private void loadImage(String filename, ImageView targetView) {
         /// Suggested by IDE
         File imageFile = new File(currentWatchDir.toString(), filename);
-        System.out.println("Path = " + imageFile.getAbsolutePath());
+        System.out.println("In loadImage: Path = " + imageFile.getAbsolutePath());
 
         try {
             /// Load the image securely using getResourceAsStream
@@ -209,34 +220,73 @@ public class Controller {
             String oldName = fileListView.getSelectionModel().getSelectedItem();
             Path sourcePath = currentWatchDir.resolve(oldName);
             Path destinationPath = currentWatchDir.resolve(fileName.getText());
-//            System.out.println("sourcePath = " + sourcePath +
-//                    "; destinationPath = " + destinationPath);
+            System.out.println("sourcePath = " + sourcePath +
+                    "; destinationPath = " + destinationPath);
 
-            try {
-                // Case-only rename: go through a temp name first - NTFS issue
-                if (sourcePath.toString().equalsIgnoreCase(destinationPath.toString())
-                        && !sourcePath.toString().equals(destinationPath.toString())) {
-                    Path tempPath = currentWatchDir.resolve(oldName + "_tmp_rename");
-                    Files.move(sourcePath, tempPath, StandardCopyOption.REPLACE_EXISTING);
-                    Files.move(tempPath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
-                } else {
-                    Files.move(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
-                }
+            /// Checking case-insensitive rename: are both .equalsIgnoreCase
+            /// and .equals true?
+            System.out.println("sourcePath.toString().equalsIgnoreCase(\n" +
+                    "destinationPath.toString() = " + sourcePath.toString()
+                            .equalsIgnoreCase(destinationPath.toString()) +
+                    "; !sourcePath.toString().equals(destinationPath.toString() = "+
+                    !sourcePath.toString().equals(destinationPath.toString()));
+
+            boolean isCaseOnlyRename = sourcePath.toString().equalsIgnoreCase(
+                        destinationPath.toString())
+                    && !sourcePath.toString().equals(destinationPath.toString());
+
+            System.out.println("isCaseOnlyRename = " + isCaseOnlyRename);
+            // + "; Files.exists(destinationPath) = " + Files.exists(destinationPath)
+
+            /// Because of findNextAvailableName, don't need to worry about
+            /// file name collisions
+
+            String resolvedName = findNextAvailableName(fileName.getText());
+            destinationPath = currentWatchDir.resolve(resolvedName);
+            System.out.println("resolvedName = " + resolvedName);
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("File Will Be Renamed");
+            confirm.setHeaderText("File '" + oldName + "' will be renamed to '" +
+                    resolvedName + "'.");
+            confirm.setContentText("Do you want to continue?");
+
+            var result = confirm.showAndWait();
+            if (result.isEmpty()) {
+                fileName.clear();
+            } else {
+                /// Collision check: auto-resolve to the lowest available number,
+                /// unless it's just a case fix
+                try {
+                    /// Case-only rename: go through a temp name first -
+                    /// NTFS issue
+                    if (isCaseOnlyRename) {
+                        Path tempPath = currentWatchDir.resolve(oldName +
+                                "_tmp_rename");
+                        Files.move(sourcePath, tempPath,
+                                StandardCopyOption.ATOMIC_MOVE);
+                        Files.move(tempPath, destinationPath,
+                                StandardCopyOption.ATOMIC_MOVE);
+                    } else {
+                        Files.move(sourcePath, destinationPath,
+                                StandardCopyOption.ATOMIC_MOVE);
+                    }
 //                System.out.println("File renamed successfully");
-            } catch (IOException e) {
+                } catch (IOException e) {
 //                System.err.println("File could not be renamed: " + e.getMessage());
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("File Rename Error");
-                alert.setHeaderText("Failed to rename file");
-                alert.setContentText("File could not be renamed: " + e.getMessage());
-                alert.showAndWait();
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("File Rename Error");
+                    alert.setHeaderText("Failed to rename file");
+                    alert.setContentText("File could not be renamed: " +
+                            e.getMessage());
+                    alert.showAndWait();
+                }
+                fileName.clear();
             }
-            fileName.clear();
         } else {
             System.out.println("Move button selected");
             String name = fileListView.getSelectionModel().getSelectedItem();
             Path sourcePath = currentWatchDir.resolve(name);
-            Path targetPath = Path.of(dirName.getText() + name);
+            Path targetPath = Path.of(dirName.getText()).resolve(name);
             try {
                 Files.move(sourcePath, targetPath, StandardCopyOption.ATOMIC_MOVE);
             } catch (IOException e) {
@@ -263,6 +313,32 @@ public class Controller {
         File destDir = dirChooser.showDialog(stage);
         if (destDir != null) {
             dirName.setText(destDir.getAbsolutePath());
+        }
+    }
+
+    private String findNextAvailableName(String desiredName) {
+        // Split into: everything before the first number, the number itself,
+        // everything after
+        // Add a *third* group in regex for detecting series numbers
+        Pattern p = Pattern.compile("^(.*?)(\\d+)?(.*)$");
+        Matcher m = p.matcher(desiredName);
+
+        if (!m.matches()) {
+            return desiredName; // no number found in the name — can't auto-resolve,
+                                // leave as-is
+        }
+
+        String prefix = m.group(1);
+        String rtInfix = m.group(3);
+        String suffix = m.group(4);
+
+        int n = 1;
+        while (true) {
+            String candidate = prefix + n + rtInfix + suffix;
+            if (!Files.exists(currentWatchDir.resolve(candidate))) {
+                return candidate;
+            }
+            n++;
         }
     }
 }
