@@ -59,7 +59,7 @@ public class DirectoryListingService {
     }
 
     /// 'Human' sorting -- save for later
-    private static int naturalCompare(String a, String b) {
+    public static int naturalCompare(String a, String b) {
         int i = 0, j = 0;
         while (i < a.length() && j < b.length()) {
             char ca = a.charAt(i), cb = b.charAt(j);
