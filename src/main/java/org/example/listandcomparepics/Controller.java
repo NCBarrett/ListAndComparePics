@@ -26,7 +26,11 @@ public class Controller {
     @FXML public Button submitBtn;
 
     @FXML public ComboBox<String> GirlID;
-
+    @FXML public ComboBox<String> EyeColor;
+    @FXML public ComboBox<String> HairColor;
+    @FXML public ComboBox<String> BraSize;
+    @FXML public ComboBox<String> ClothesType;
+    
     @FXML public HBox dirPane;
 
     @FXML public ImageView imageViewer;
@@ -48,6 +52,16 @@ public class Controller {
     @FXML public TextField RegEx;
     @FXML public TextField RegEx2;
     @FXML public TextField endFilePath;
+    public ComboBox ClothesStyle;
+    public ComboBox TopPattern;
+    public ComboBox BottomPattern;
+    public ComboBox MainOnlyColor;
+    public ComboBox MainColor2;
+    public ComboBox BottomOnlyColor;
+    public ComboBox MainColor3;
+    public ComboBox MainColor4;
+    public ComboBox MainColor5;
+
 
     private DirectoryWatcherService watcherService;
     private DirectoryListingService listingService;

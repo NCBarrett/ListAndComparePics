@@ -15,6 +15,7 @@
 
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.layout.Region?>
 <VBox fx:id="root" xmlns:fx="http://javafx.com/fxml"
       fx:controller="org.example.listandcomparepics.Controller">
 
@@ -28,9 +29,9 @@
 
     <HBox>
         <VBox fx:id="leftPane" alignment="CENTER" >
-<!--             spacing="20.0"-->
+<!--             spacing="5.0"-->
             <padding>
-                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
             </padding>
 
             <VBox spacing="10" > <!--maxWidth="900" -->
@@ -62,7 +63,7 @@
                     > <!--            style="-fx-border-color: black"-->
 
                 <padding>
-                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                 </padding>
                     <TextField fx:id="RegEx2" text="TEXT TO COPY: ^Girl \d+(\s*\(\d+\))?" maxWidth="250"/>
                     <TextField fx:id="rtTextRegEx" promptText="Enter RegEx" maxWidth="250"/>
@@ -81,19 +82,116 @@
         </HBox>
     </HBox>
 
-    <VBox>
-        <HBox>
-            <VBox>
-                <ComboBox fx:id="GirlID">
-
-                </ComboBox>
+    <VBox spacing="10" style="-fx-border-color: red">
+        <HBox style="-fx-border-color: green">
+            <padding>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+            </padding>
+            <VBox spacing="5">
+                <HBox alignment="BASELINE_CENTER">
+                    <Label text="Girl ID: "/>
+                    <ComboBox fx:id="GirlID" editable="true" prefWidth="120"
+                        promptText="Type/Select ID"/>
+                </HBox>
+                <HBox alignment="BASELINE_CENTER">
+                    <Label text="Eye color: "/>
+                    <ComboBox fx:id="EyeColor" editable="true" prefWidth="120"/>
+                </HBox>
+                <HBox alignment="BASELINE_CENTER">
+                    <Label text="Hair color: "/>
+                    <ComboBox fx:id="HairColor" editable="true" prefWidth="120"/>
+                </HBox>
+                <HBox alignment="BASELINE_CENTER">
+                    <Label text="Bra size: "/>
+                    <ComboBox fx:id="BraSize" editable="true" prefWidth="100"/>
+                </HBox>
             </VBox>
-            <VBox>
 
+            <Region prefWidth="20"/>
+
+            <VBox  HBox.hgrow="ALWAYS" spacing="5" style="-fx-border-color: blue"
+                >
+<!--                -->
+                <HBox style="-fx-border-color: orange" alignment="CENTER"
+                        spacing="10">
+                    <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                    </padding>
+                    <HBox alignment="BASELINE_CENTER" >
+                        <Label text="Clothes Type: "/>
+                        <ComboBox fx:id="ClothesType" editable="true"
+                                  prefWidth="150"/>
+                    </HBox>
+                    <HBox alignment="BASELINE_CENTER" >
+                        <Label text="Clothes Style: "/>
+                        <ComboBox fx:id="ClothesStyle" editable="true"
+                                  prefWidth="150"/>
+                    </HBox>
+                </HBox>
+                <HBox>
+                    <VBox style="-fx-border-color: purple" spacing="5">
+                        <padding>
+                            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                        </padding>
+                        <HBox spacing="10">
+                            <Label text="Top/Only Pattern: "/>
+                            <ComboBox fx:id="TopPattern" editable="true"
+                                prefWidth="150"/>
+                        </HBox>
+                        <HBox>
+                            <Label text="Main/Only Color: "/>
+                            <ComboBox fx:id="MainOnlyColor" editable="true"
+                                prefWidth="150"/>
+                        </HBox>
+                        <HBox>
+                            <Label text="Color 2: "/>
+                            <ComboBox fx:id="MainColor2" editable="true"
+                                prefWidth="150"/>
+                        </HBox>
+                        <HBox>
+                            <Label text="Color 3: "/>
+                            <ComboBox fx:id="MainColor3" editable="true"
+                                prefWidth="150"/>
+                        </HBox>
+                        <HBox>
+                            <Label text="Color 4: "/>
+                            <ComboBox fx:id="MainColor4" editable="true"
+                                      prefWidth="150"/>
+                        </HBox>
+                        <HBox>
+                            <Label text="Color 5: "/>
+                            <ComboBox fx:id="MainColor5" editable="true"
+                                    prefWidth="150"/>
+                        </HBox>
+                    </VBox>
+
+                    <Region prefWidth="20"/>
+                    <VBox style="-fx-border-color: indigo" spacing="5">
+
+                        <padding>
+                            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                        </padding>
+                        <HBox spacing="10">
+                            <Label text="Bottom Pattern: "/>
+                            <ComboBox fx:id="BottomPattern" editable="true"
+                                prefWidth="150"/>
+                        </HBox>
+                        <HBox>
+                            <Label text="Bottom Main/Only Color: "/>
+                            <ComboBox fx:id="BottomOnlyColor" editable="true"
+                                prefWidth="150"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
             </VBox>
         </HBox>
+
         <HBox alignment="CENTER" maxWidth="800"
-              spacing="10" style="-fx-border-color: black"> <!-- prefHeight="35"-->
+              spacing="10" style="-fx-border-color: black">
+            <!-- prefHeight="35"-->
+            <padding>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+            </padding>
 
             <TextField promptText="Select a file and add attributes." prefWidth="700"/>
             <Button fx:id="submitBtn" text="Submit" onAction="#submitButton"/>
