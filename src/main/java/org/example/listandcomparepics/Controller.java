@@ -15,15 +15,17 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class Controller {
 
     @FXML public Button dirBrowser;
     @FXML public Button submitBtn;
 
-    @FXML public ComboBox GirlID;
+    @FXML public ComboBox<String> GirlID;
 
     @FXML public HBox dirPane;
 
@@ -49,68 +51,80 @@ public class Controller {
 
     private DirectoryWatcherService watcherService;
     private DirectoryListingService listingService;
+
     private Path currentWatchDir;
+
     private Stage stage;
 
-    public void initialize() {
+    // Cycle protection flag: blocks the ComboBox listener from firing
+    // when changes are made automatically via code rather than manually
+    private boolean isAutoUpdating = false;
 
+    public void initialize() {
         this.watcherService = new DirectoryWatcherService();
         this.listingService = new DirectoryListingService();
 
+        // Left List Selection Listener
         fileListView.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue,
                  newValue) -> {
                     if (newValue != null) {
                         System.out.println("Updating left imageViewer");
                         loadImage(newValue, imageViewer);
-                        extractID(newValue);
-                    }
-        });
 
+                        isAutoUpdating = true;  // Activate cycle protection shield
+                        extractID(newValue);
+                        isAutoUpdating = false; // Deactivate shield
+                    }
+                }
+        );
+
+        // Right List Selection Listener
         rtFileListView.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue,
                  newValue) -> {
                     if (newValue != null) {
                         System.out.println("Updating right imageViewer");
-//                        loadImage(newValue, rtImageViewer);
                     }
-                });
+                }
+        );
 
+        // GirlID ComboBox Listener
         GirlID.valueProperty().addListener((
                 observable, oldValue, newValue) -> {
-            if (newValue != null && !newValue.toString().isBlank()) {
-                String selectedId = newValue.toString().trim();
+            if (isAutoUpdating) {
+                return; // Stop the feedback refresh loop here
             }
-        })
-
-        textRegEx.textProperty().addListener((
-                observable, oldValue,
-                newValue) -> {refreshListView();
+            if (newValue != null && !newValue.isBlank()) {
+                String selectedId = newValue.trim();
+                // Dynamically route text to drive your right historical filtering
+                rtTextRegEx.setText("^Girl " + selectedId);
+            }
         });
 
-        rtTextRegEx.textProperty().addListener((
-                observable, oldValue,
-                newValue) -> { refreshListView();
+        // Search text listeners triggering reactive list filters
+        textRegEx.textProperty().addListener((observable, oldValue, newValue) -> {
+            refreshListView();
         });
 
+        rtTextRegEx.textProperty().addListener((observable, oldValue, newValue) -> {
+            refreshListView();
+        });
+
+        rtFileListView.setCellFactory(param ->
+                new ImageThumbListCell(currentWatchDir));
     }
 
     private String extractID(String newValue) {
-        /// 1. Compile the naming convention pattern matching "Girl [number]"
-        /// (?:Animated )? gracefully skips the optional 'Animated ' prefix
+        // Compile your core convention pattern. Skips 'Animated ' optionally.
         Pattern pattern = Pattern.compile("^(?:Animated )?Girl (\\d+)");
         Matcher matcher = pattern.matcher(newValue);
-
         String idNumber = "";
 
-        /// 2. Extract the number group if found
         if (matcher.find()) {
-            idNumber = matcher.group(1); /// Extract the digits
-
-            /// 3. Programmatically set the display value of your Combobox
-            GirlID.setValue(idNumber);
+            idNumber = matcher.group(1); // Safely isolate the string of digits
+            GirlID.setValue(idNumber);   // Programmatically snap the ComboBox value to match
         }
-
         return idNumber;
     }
 
@@ -118,125 +132,95 @@ public class Controller {
         this.stage = stage;
     }
 
+
     @FXML
     private void onDirBrowserClick() {
         DirectoryChooser dirChooser = new DirectoryChooser();
         dirChooser.setTitle("Select Directory");
-
         File selectedDir = dirChooser.showDialog(stage);
-        if (selectedDir != null) {
 
+        if (selectedDir != null) {
             dirChosen.setText(selectedDir.getAbsolutePath());
             currentWatchDir = selectedDir.toPath();
 
-            /// 1. Refresh List
-            refreshListView();
+            refreshListView(); // Initial listing load
 
-            /// 2. Start watching directory for changes
             try {
+                // Attach the background thread callback watcher system
                 watcherService.startWatching(currentWatchDir, this::refreshListView);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
             stage.sizeToScene();
         }
     }
 
     private void refreshListView() {
-        if (currentWatchDir != null) {
+        if (currentWatchDir == null) return;
 
-            /// --- LEFT PANE PROCESSING (ANOMALIES / BREAKING CODES) ---
-            /// Get user regex, trim, and wrap with strict anchors if they
-            /// aren't explicitly typed
-            String leftRaw = "";
-            if (textRegEx.getText() != null) {
-                leftRaw = textRegEx.getText().trim();
-            } else {
-                leftRaw = "";
-            }
-
-            /// Wrap with strict ^ and $ string anchors if they aren't
-            /// explicitly typed
-            if (!leftRaw.isEmpty()) {
-                if (!leftRaw.startsWith("^")) {
-                    leftRaw = "^" + leftRaw;
-                }
-                if (!leftRaw.endsWith("$")) {
-                    leftRaw = leftRaw + "$";
-                }
-            }
-
-            /// Update the ListView items
-            /// Pass the strict pattern to your left list view
-            fileListView.setItems(listingService.getDirectoryListing(
-                    currentWatchDir, leftRaw));
-
-            // =================================================================
-            // 2. RIGHT PANE PROCESSING (CLEAN TARGET CONVENTION)
-            // =================================================================
-            String rightRaw = "";
-            if (rtTextRegEx.getText() != null) {
-                rightRaw = endFilePath.getText().trim();
-            } else {
-                rightRaw = "";
-            }
-
-            if (!rightRaw.isEmpty()) {
-                if (!rightRaw.startsWith("^")) {
-                    rightRaw = "^" + rightRaw;
-                }
-                if (!rightRaw.endsWith("$")) {
-                    rightRaw = rightRaw + "$";
-                }
-            }
-
-            /// Fetch the baseline items matching your strict naming pattern
-            var rtItems = listingService.getDirectoryListing(
-                    currentWatchDir, rightRaw, true);
-
-            /// Custom Two-Tier Sort: Bubble "Animated" files to the top,
-            /// then sort naturally
-            rtItems.sort((file1, file2) -> {
-                boolean f1Anim = file1.toLowerCase().startsWith("animated");
-                boolean f2Anim = file2.toLowerCase().startsWith("animated");
-
-                // Tier 1 logic: One is animated, one is not
-                if (f1Anim && !f2Anim) {
-                    return -1; // Force file1 up to the top
-                }
-                if (!f1Anim && f2Anim) {
-                    return 1;  // Force file2 up to the top
-                }
-
-                // Tier 2 logic: Both are animated OR both are normal (fallback to your natural compare)
-                return DirectoryListingService.naturalCompare(file1, file2);
-            });
-
-            rtFileListView.setItems(rtItems);
-
-            if (!rtItems.isEmpty()) {
-                rtFileListView.scrollTo(rtItems.size());
-            }
+        // --- LEFT PANE PROCESSING (Worklist / Filtered Source files) ---
+//        String leftRaw = (textRegEx.getText() != null) ? textRegEx.getText().trim() : "";
+        String leftRaw;
+        if (textRegEx.getText() != null) {
+            leftRaw = textRegEx.getText().trim();
+        } else {
+            leftRaw = "";
         }
-    }
 
-    public void shutdown() {
-        watcherService.stopWatching();
+        if (!leftRaw.isEmpty()) {
+            if (!leftRaw.startsWith("^")) leftRaw = "^" + leftRaw;
+            if (!leftRaw.endsWith("$")) leftRaw = leftRaw + "$";
+        }
+
+        /// Fetch left items
+        var leftItems = listingService.getDirectoryListing(currentWatchDir, leftRaw);
+
+        /// Universal Filter: Completely remove any file starting with "animated"
+        leftItems.removeIf(filename -> filename.toLowerCase().startsWith(
+                "animated"));
+
+        leftItems.sort((file1, file2) ->
+                DirectoryListingService.naturalCompare(file1, file2));
+
+        fileListView.setItems(leftItems);
+
+        // --- RIGHT PANE PROCESSING (Clean Targets / Historical Baseline) ---
+//        String rightRaw = (rtTextRegEx.getText() != null) ? rtTextRegEx.getText().trim() : "";
+        String rightRaw;
+        if (rtTextRegEx.getText() != null) {
+            rightRaw = rtTextRegEx.getText().trim();
+        } else {
+            rightRaw = "";
+        }
+
+        if (!rightRaw.isEmpty()) {
+            if (!rightRaw.startsWith("^")) rightRaw = "^" + rightRaw;
+            if (!rightRaw.endsWith("$")) rightRaw = rightRaw + "$";
+        }
+
+        var rtItems = listingService.getDirectoryListing(currentWatchDir, rightRaw,
+                true);
+
+        /// Custom Two-Tier Sort: Bubble "Animated" files up, then default to natural
+        /// compare
+        rtItems.removeIf(filename -> filename.toLowerCase().startsWith("animated"));
+
+        rtItems.sort((file1, file2) ->
+            DirectoryListingService.naturalCompare(file1, file2));
+
+        rtFileListView.setItems(rtItems);
+//        if (!rtItems.isEmpty()) {
+//            rtFileListView.scrollTo(rtItems.size());
+//        }
     }
 
     private void loadImage(String filename, ImageView targetView) {
-        /// Suggested by IDE
         File imageFile = new File(currentWatchDir.toString(), filename);
         System.out.println("In loadImage: Path = " + imageFile.getAbsolutePath());
-
         try {
-            /// Load the image securely using getResourceAsStream
             Image image = new Image(imageFile.toURI().toString());
-            /// imageViewer.setImage(image) DOES NOT bind the image
             targetView.imageProperty().set(image);
         } catch (Exception e) {
-//            System.err.println("Error loading image: " + filename);
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Image Load Error");
             alert.setHeaderText("Failed to load image");
@@ -247,7 +231,74 @@ public class Controller {
     }
 
     public void submitButton(ActionEvent event) {
+        String oldName = fileListView.getSelectionModel().getSelectedItem();
+        if (oldName == null) return;
 
+        Path sourcePath = currentWatchDir.resolve(oldName);
+        String targetBaseName = endFilePath.getText().trim();
+        if (targetBaseName.isEmpty()) return;
+
+        String ext = oldName.contains(".") ? oldName.substring(oldName.lastIndexOf(".")) : ".jpg";
+        String resolvedName = findNextAvailableName(targetBaseName, ext);
+        Path destinationPath = currentWatchDir.resolve(resolvedName);
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("File Will Be Renamed");
+        confirm.setHeaderText("File '" + oldName + "' will be renamed to '" + resolvedName + "'.");
+        confirm.setContentText("Do you want to continue?");
+
+        var result = confirm.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                // Direct file rename execution block
+                Files.move(sourcePath, destinationPath, StandardCopyOption.ATOMIC_MOVE);
+            } catch (IOException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("File Rename Error");
+                alert.setHeaderText("Failed to rename file");
+                alert.setContentText("File could not be renamed: " + e.getMessage());
+                alert.showAndWait();
+            }
+            refreshListView();
+            imageViewer.setImage(null);
+        }
     }
 
+    private String findNextAvailableName(String baseNameWithoutExt, String extension) {
+        Pattern seriesPattern = Pattern.compile("^" + Pattern.quote(baseNameWithoutExt) + " \\((\\d+)\\)");
+        int highestSeriesNum = 0;
+        boolean absoluteBaseExists = false;
+
+        try (Stream<Path> stream = Files.list(currentWatchDir)) {
+            for (Path path : stream.toList()) {
+                String existingName = path.getFileName().toString();
+
+                if (existingName.equalsIgnoreCase(baseNameWithoutExt + extension)) {
+                    absoluteBaseExists = true;
+                }
+
+                Matcher m = seriesPattern.matcher(existingName);
+                if (m.find()) {
+                    int num = Integer.parseInt(m.group(1));
+                    if (num > highestSeriesNum) {
+                        highestSeriesNum = num;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Could not scan directory for sequence tracking: " + e.getMessage());
+            return baseNameWithoutExt + extension;
+        }
+
+        if (!absoluteBaseExists && highestSeriesNum == 0) {
+            return baseNameWithoutExt + extension;
+        } else {
+            int nextNum = Math.max(1, highestSeriesNum + 1);
+            return baseNameWithoutExt + " (" + nextNum + ")" + extension;
+        }
+    }
+
+    public void shutdown() {
+        watcherService.stopWatching();
+    }
 }
