@@ -30,7 +30,21 @@ public class Controller {
     @FXML public ComboBox<String> HairColor;
     @FXML public ComboBox<String> BraSize;
     @FXML public ComboBox<String> ClothesType;
-    
+    @FXML public ComboBox<String> ClothesStyle;
+    @FXML public ComboBox<String> TopPattern;
+    @FXML public ComboBox<String> MainOnlyColor;
+    @FXML public ComboBox<String> MainColor2;
+    @FXML public ComboBox<String> MainColor3;
+    @FXML public ComboBox<String> MainColor4;
+    @FXML public ComboBox<String> MainColor5;
+    @FXML public ComboBox<String> BottomPattern;
+    @FXML public ComboBox<String> BottomOnlyColor;
+    @FXML public ComboBox<String> BottomColor2;
+    @FXML public ComboBox<String> BottomColor3;
+    @FXML public ComboBox<String> BottomColor5;
+    @FXML public ComboBox<String> BottomColor4;
+    @FXML public ComboBox<String> Scene;
+
     @FXML public HBox dirPane;
 
     @FXML public ImageView imageViewer;
@@ -52,21 +66,18 @@ public class Controller {
     @FXML public TextField RegEx;
     @FXML public TextField RegEx2;
     @FXML public TextField endFilePath;
-    public ComboBox ClothesStyle;
-    public ComboBox TopPattern;
-    public ComboBox BottomPattern;
-    public ComboBox MainOnlyColor;
-    public ComboBox MainColor2;
-    public ComboBox BottomOnlyColor;
-    public ComboBox MainColor3;
-    public ComboBox MainColor4;
-    public ComboBox MainColor5;
 
 
     private DirectoryWatcherService watcherService;
     private DirectoryListingService listingService;
 
     private Path currentWatchDir;
+
+    // Additional storage mappings for your new layout categories
+    private final Path styleFile = Path.of("saved_clothes_styles.txt");
+    private final Path patternCatFile = Path.of("saved_pattern_categories.txt");
+    private final Path patternSubFile = Path.of("saved_pattern_subcategories.txt");
+    private final Path colorsFile = Path.of("saved_discovered_colors.txt");
 
     private Stage stage;
 
@@ -116,6 +127,52 @@ public class Controller {
             }
         });
 
+//        // Listen for changes on the parent pattern category dropdown
+//        PatternCategory.valueProperty().addListener((observable, oldValue, newValue) -> {
+//            // If the change is triggered programmatically by our auto-updater flag, skip it
+//            if (isAutoUpdating) {
+//                return;
+//            }
+//
+//            // Pass the newly selected category name to our filter procedure
+//            updatePatternSubcategories(newValue);
+//        });
+
+        /// =================================================================
+        /// INITIALIZE STANDARD DROPDOWN OPTIONS
+        /// =================================================================
+
+        /// 1. Clothes Types (Ordered by frequency of occurrence)
+        if (ClothesType.getItems().isEmpty()) {
+            ClothesType.getItems().setAll("Bikini", "Pants & Shirt", "Lingerie", "Other street clothes");
+        }
+
+        // 2. Clothes Styles
+        if (ClothesStyle.getItems().isEmpty()) {
+            ClothesStyle.getItems().setAll("Top and Bottom Match", "Top compliments Bottom", "Top Only");
+        }
+
+        // 3. Pattern Category Divisions
+        if (TopPattern.getItems().isEmpty()) {
+            TopPattern.getItems().setAll("Main with Compliments", "Simple");
+        }
+
+        if (BottomPattern.getItems().isEmpty()) {
+            BottomPattern.getItems().setAll("Main with Compliments", "Simple");
+        }
+
+        // Load saved custom entries from disk if you have previously discovered any
+        loadSavedTags(styleFile, ClothesStyle);
+//        loadSavedTags(patternCatFile, PatternCategory);
+//        loadSavedTags(patternSubFile, PatternSubcategory);
+//
+//        // Shared color dictionary loader (all color boxes pull from the same persistent file)
+//        loadSavedTags(colorsFile, ColorMain);
+//        loadSavedTags(colorsFile, Color2);
+//        loadSavedTags(colorsFile, Color3);
+//        loadSavedTags(colorsFile, Color4);
+//        loadSavedTags(colorsFile, Color5);
+
         // Search text listeners triggering reactive list filters
         textRegEx.textProperty().addListener((observable, oldValue, newValue) -> {
             refreshListView();
@@ -127,6 +184,10 @@ public class Controller {
 
         rtFileListView.setCellFactory(param ->
                 new ImageThumbListCell(currentWatchDir));
+    }
+
+    private void loadSavedTags(Path styleFile, ComboBox<String> clothesStyle) {
+
     }
 
     private String extractID(String newValue) {
@@ -245,74 +306,139 @@ public class Controller {
     }
 
     public void submitButton(ActionEvent event) {
-        String oldName = fileListView.getSelectionModel().getSelectedItem();
-        if (oldName == null) return;
-
-        Path sourcePath = currentWatchDir.resolve(oldName);
-        String targetBaseName = endFilePath.getText().trim();
-        if (targetBaseName.isEmpty()) return;
-
-        String ext = oldName.contains(".") ? oldName.substring(oldName.lastIndexOf(".")) : ".jpg";
-        String resolvedName = findNextAvailableName(targetBaseName, ext);
-        Path destinationPath = currentWatchDir.resolve(resolvedName);
-
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("File Will Be Renamed");
-        confirm.setHeaderText("File '" + oldName + "' will be renamed to '" + resolvedName + "'.");
-        confirm.setContentText("Do you want to continue?");
-
-        var result = confirm.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            try {
-                // Direct file rename execution block
-                Files.move(sourcePath, destinationPath, StandardCopyOption.ATOMIC_MOVE);
-            } catch (IOException e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("File Rename Error");
-                alert.setHeaderText("Failed to rename file");
-                alert.setContentText("File could not be renamed: " + e.getMessage());
-                alert.showAndWait();
-            }
-            refreshListView();
-            imageViewer.setImage(null);
-        }
+//        String oldName = fileListView.getSelectionModel().getSelectedItem();
+//        if (oldName == null) return;
+//
+//        Path sourcePath = currentWatchDir.resolve(oldName);
+//        String targetBaseName = endFilePath.getText().trim();
+//        if (targetBaseName.isEmpty()) return;
+//
+//        String ext = oldName.contains(".") ? oldName.substring(oldName.lastIndexOf(".")) : ".jpg";
+//        String resolvedName = findNextAvailableName(targetBaseName, ext);
+//        Path destinationPath = currentWatchDir.resolve(resolvedName);
+//
+//        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+//        confirm.setTitle("File Will Be Renamed");
+//        confirm.setHeaderText("File '" + oldName + "' will be renamed to '" + resolvedName + "'.");
+//        confirm.setContentText("Do you want to continue?");
+//
+//        var result = confirm.showAndWait();
+//        if (result.isPresent() && result.get() == ButtonType.OK) {
+//            try {
+//                // Direct file rename execution block
+//                Files.move(sourcePath, destinationPath, StandardCopyOption.ATOMIC_MOVE);
+//            } catch (IOException e) {
+//                Alert alert = new Alert(Alert.AlertType.ERROR);
+//                alert.setTitle("File Rename Error");
+//                alert.setHeaderText("Failed to rename file");
+//                alert.setContentText("File could not be renamed: " + e.getMessage());
+//                alert.showAndWait();
+//            }
+//            refreshListView();
+//            imageViewer.setImage(null);
+//        }
     }
 
-    private String findNextAvailableName(String baseNameWithoutExt, String extension) {
-        Pattern seriesPattern = Pattern.compile("^" + Pattern.quote(baseNameWithoutExt) + " \\((\\d+)\\)");
-        int highestSeriesNum = 0;
-        boolean absoluteBaseExists = false;
+//    private void loadSavedTags(Path file, ComboBox<String> comboBox) {
+//        // 1. Verify if the target configuration file exists on your disk
+//        if (Files.exists(file)) {
+//            try (Stream<String> lines = Files.lines(file)) {
+//                // Read lines, strip out extra empty spacing, and collect valid entries
+//                var items = lines.map(String::trim)
+//                        .filter(line -> !line.isEmpty())
+//                        .toList();
+//
+//                // Push the collected historical entries into the dropdown list container
+//                comboBox.getItems().setAll(items);
+//                System.out.println("Successfully loaded tags from file: " + file.getFileName());
+//            } catch (IOException e) {
+//                System.err.println("Could not read tag entries from " + file + ": " + e.getMessage());
+//            }
+//        } else {
+//            // 2. Fallback initialization defaults if the text files do not exist yet
+//            if (comboBox == BraSize) {
+//                BraSize.getItems().setAll("M", "L", "XL", "XXL");
+//            }
+//            if (comboBox == ClothesType) {
+//                ClothesType.getItems().setAll("bikini", "Pants & Shirt", "Lingerie", "Other street clothes");
+//            }
+//            if (comboBox == ClothesStyle) {
+//                ClothesStyle.getItems().setAll("Top and Bottom Match", "Top compliments Bottom", "Top Only");
+//            }
+//            if (comboBox == PatternCategory) {
+//                PatternCategory.getItems().setAll("Main with Compliments", "Simple");
+//            }
+//        }
+//    }
 
-        try (Stream<Path> stream = Files.list(currentWatchDir)) {
-            for (Path path : stream.toList()) {
-                String existingName = path.getFileName().toString();
+//    private void updatePatternSubcategories(String parentCategory) {
+//        // 1. Clear out any old subcategory options currently in the child box
+//        PatternSubcategory.getItems().clear();
+//        PatternSubcategory.setValue(null); // Reset the current display selection
+//
+//        if (parentCategory != null) {
+//            String cleanCategory = parentCategory.trim();
+//
+//            // 2. Check if the user selected "Main with Compliments"
+//            if (cleanCategory.equals("Main with Compliments")) {
+//                PatternSubcategory.getItems().setAll(
+//                        "Leopard skin",
+//                        "Polka dot",
+//                        "Stripes",
+//                        "Floral",
+//                        "Other"
+//                );
+//                System.out.println("Loaded subcategories for Main with Compliments");
+//            }
+//
+//            // 3. Check if the user selected "Simple"
+//            if (cleanCategory.equals("Simple")) {
+//                PatternSubcategory.getItems().setAll(
+//                        "Full color",
+//                        "Equal stripes"
+//                );
+//                System.out.println("Loaded subcategories for Simple");
+//            }
+//        }
+//    }
 
-                if (existingName.equalsIgnoreCase(baseNameWithoutExt + extension)) {
-                    absoluteBaseExists = true;
-                }
-
-                Matcher m = seriesPattern.matcher(existingName);
-                if (m.find()) {
-                    int num = Integer.parseInt(m.group(1));
-                    if (num > highestSeriesNum) {
-                        highestSeriesNum = num;
-                    }
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Could not scan directory for sequence tracking: " + e.getMessage());
-            return baseNameWithoutExt + extension;
-        }
-
-        if (!absoluteBaseExists && highestSeriesNum == 0) {
-            return baseNameWithoutExt + extension;
-        } else {
-            int nextNum = Math.max(1, highestSeriesNum + 1);
-            return baseNameWithoutExt + " (" + nextNum + ")" + extension;
-        }
-    }
+//
+//    private String findNextAvailableName(String baseNameWithoutExt, String extension) {
+//        Pattern seriesPattern = Pattern.compile("^" + Pattern.quote(baseNameWithoutExt) + " \\((\\d+)\\)");
+//        int highestSeriesNum = 0;
+//        boolean absoluteBaseExists = false;
+//
+//        try (Stream<Path> stream = Files.list(currentWatchDir)) {
+//            for (Path path : stream.toList()) {
+//                String existingName = path.getFileName().toString();
+//
+//                if (existingName.equalsIgnoreCase(baseNameWithoutExt + extension)) {
+//                    absoluteBaseExists = true;
+//                }
+//
+//                Matcher m = seriesPattern.matcher(existingName);
+//                if (m.find()) {
+//                    int num = Integer.parseInt(m.group(1));
+//                    if (num > highestSeriesNum) {
+//                        highestSeriesNum = num;
+//                    }
+//                }
+//            }
+//        } catch (IOException e) {
+//            System.err.println("Could not scan directory for sequence tracking: " + e.getMessage());
+//            return baseNameWithoutExt + extension;
+//        }
+//
+//        if (!absoluteBaseExists && highestSeriesNum == 0) {
+//            return baseNameWithoutExt + extension;
+//        } else {
+//            int nextNum = Math.max(1, highestSeriesNum + 1);
+//            return baseNameWithoutExt + " (" + nextNum + ")" + extension;
+//        }
+//    }
 
     public void shutdown() {
         watcherService.stopWatching();
     }
 }
+

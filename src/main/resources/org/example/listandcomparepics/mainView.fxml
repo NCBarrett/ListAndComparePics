@@ -52,16 +52,11 @@
 <!--                         style="-fx-border-color: red"-->
                     </StackPane>
                 </HBox>
-
-
             </VBox>
         </VBox>
-
         <HBox>
-
             <VBox fx:id="rightPane" alignment="TOP_RIGHT" spacing="10.0"
                     > <!--            style="-fx-border-color: black"-->
-
                 <padding>
                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                 </padding>
@@ -82,8 +77,10 @@
         </HBox>
     </HBox>
 
-    <VBox spacing="10" style="-fx-border-color: red">
-        <HBox style="-fx-border-color: green">
+    <VBox spacing="10" >
+<!--    style="-fx-border-color: red"    -->
+        <HBox >
+<!--        style="-fx-border-color: green"    -->
             <padding>
                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
             </padding>
@@ -105,13 +102,18 @@
                     <Label text="Bra size: "/>
                     <ComboBox fx:id="BraSize" editable="true" prefWidth="100"/>
                 </HBox>
+                <Region prefWidth="20"/>
+                <VBox  alignment="CENTER">
+                    <!--                    style="-fx-border-color: orange"    -->
+                    <Label text="Scene: "/>
+                    <ComboBox fx:id="Scene" editable="true" prefWidth="150"/>
+                </VBox>
             </VBox>
 
-            <Region prefWidth="20"/>
+            <Region prefWidth="50"/>
 
-            <VBox  HBox.hgrow="ALWAYS" spacing="5" style="-fx-border-color: blue"
-                >
-<!--                -->
+            <VBox  HBox.hgrow="ALWAYS" spacing="5">
+<!--            style="-fx-border-color: blue"    -->
                 <HBox style="-fx-border-color: orange" alignment="CENTER"
                         spacing="10">
                     <padding>
@@ -129,7 +131,8 @@
                     </HBox>
                 </HBox>
                 <HBox>
-                    <VBox style="-fx-border-color: purple" spacing="5">
+                    <VBox  spacing="5">
+<!--                    style="-fx-border-color: purple"    -->
                         <padding>
                             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                         </padding>
@@ -166,8 +169,8 @@
                     </VBox>
 
                     <Region prefWidth="20"/>
-                    <VBox style="-fx-border-color: indigo" spacing="5">
-
+                    <VBox  spacing="5">
+<!--                style="-fx-border-color: indigo"        -->
                         <padding>
                             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                         </padding>
@@ -181,14 +184,34 @@
                             <ComboBox fx:id="BottomOnlyColor" editable="true"
                                 prefWidth="150"/>
                         </HBox>
+                        <HBox>
+                            <Label text="Bottom Color 2: " />
+                            <ComboBox fx:id="BottomColor2" editable="true"
+                                prefWidth="150"/>
+                        </HBox>
+                        <HBox>
+                            <Label text="Bottom Color 3: "/>
+                            <ComboBox fx:id="BottomColor3" editable="true"
+                                prefWidth="150"/>
+                        </HBox>
+                        <HBox>
+                            <Label text="Bottom Color 4: "/>
+                            <ComboBox fx:id="BottomColor4" editable="true"
+                                      prefWidth="150"/>
+                        </HBox>
+                        <HBox>
+                            <Label text="Bottom Color 5: "/>
+                            <ComboBox fx:id="BottomColor5" editable="true"
+                                      prefWidth="150"/>
+                        </HBox>
                     </VBox>
                 </HBox>
             </VBox>
         </HBox>
 
         <HBox alignment="CENTER" maxWidth="800"
-              spacing="10" style="-fx-border-color: black">
-            <!-- prefHeight="35"-->
+              spacing="10" >
+            <!-- prefHeight="35" style="-fx-border-color: black"-->
             <padding>
                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
             </padding>
