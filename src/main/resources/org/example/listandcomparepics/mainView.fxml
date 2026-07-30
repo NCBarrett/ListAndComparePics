@@ -16,6 +16,7 @@
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.TitledPane?>
 <VBox fx:id="root" xmlns:fx="http://javafx.com/fxml"
       fx:controller="org.example.listandcomparepics.Controller">
 
@@ -131,80 +132,99 @@
                     </HBox>
                 </HBox>
                 <HBox>
-                    <VBox  spacing="5">
-<!--                    style="-fx-border-color: purple"    -->
-                        <padding>
-                            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
-                        </padding>
-                        <HBox spacing="10">
-                            <Label text="Top/Only Pattern: "/>
-                            <ComboBox fx:id="TopPattern" editable="true"
-                                prefWidth="150"/>
-                        </HBox>
-                        <HBox>
-                            <Label text="Main/Only Color: "/>
-                            <ComboBox fx:id="MainOnlyColor" editable="true"
-                                prefWidth="150"/>
-                        </HBox>
-                        <HBox>
-                            <Label text="Color 2: "/>
-                            <ComboBox fx:id="MainColor2" editable="true"
-                                prefWidth="150"/>
-                        </HBox>
-                        <HBox>
-                            <Label text="Color 3: "/>
-                            <ComboBox fx:id="MainColor3" editable="true"
-                                prefWidth="150"/>
-                        </HBox>
-                        <HBox>
-                            <Label text="Color 4: "/>
-                            <ComboBox fx:id="MainColor4" editable="true"
-                                      prefWidth="150"/>
-                        </HBox>
-                        <HBox>
-                            <Label text="Color 5: "/>
-                            <ComboBox fx:id="MainColor5" editable="true"
-                                    prefWidth="150"/>
-                        </HBox>
-                    </VBox>
+                    <TitledPane text="Top/Only" collapsible="false">
+                        <VBox spacing="5">
+                            <!--                    style="-fx-border-color: purple"    -->
+                            <padding>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                            </padding>
+
+                            <VBox>
+                                <!-- Top-Left Row: Category Pair -->
+                                <!-- alignment="CENTER_LEFT" keeps the label and
+                                    dropdown snapped to the left wall -->
+                                <HBox alignment="CENTER_LEFT" spacing="5">
+                                    <Label text="Pattern Type: "/>
+                                    <ComboBox fx:id="TopPatternType" editable="true"
+                                              prefWidth="150"/>
+                                </HBox>
+                                <!-- Bottom-Right Row: Subcategory Pair -->
+                                <!-- alignment="CENTER_RIGHT" forces the label and
+                                    dropdown to snap to the right wall -->
+                                <HBox alignment="CENTER_RIGHT" spacing="5">
+                                    <Label text="Pattern Subtype: "/>
+                                    <ComboBox fx:id="TopPatternSubType" editable="true"
+                                              prefWidth="150"/>
+                                </HBox>
+                            </VBox>
+                            <HBox>
+                                <Label text="Main/Only Color: "/>
+                                <ComboBox fx:id="MainOnlyColor" editable="true"
+                                          prefWidth="150"/>
+                            </HBox>
+                            <HBox>
+                                <Label text="Color 2: "/>
+                                <ComboBox fx:id="MainColor2" editable="true"
+                                          prefWidth="150"/>
+                            </HBox>
+                            <HBox>
+                                <Label text="Color 3: "/>
+                                <ComboBox fx:id="MainColor3" editable="true"
+                                          prefWidth="150"/>
+                            </HBox>
+                            <HBox>
+                                <Label text="Color 4: "/>
+                                <ComboBox fx:id="MainColor4" editable="true"
+                                          prefWidth="150"/>
+                            </HBox>
+                            <HBox>
+                                <Label text="Color 5: "/>
+                                <ComboBox fx:id="MainColor5" editable="true"
+                                          prefWidth="150"/>
+                            </HBox>
+                        </VBox>
+                    </TitledPane>
 
                     <Region prefWidth="20"/>
-                    <VBox  spacing="5">
-<!--                style="-fx-border-color: indigo"        -->
-                        <padding>
-                            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
-                        </padding>
-                        <HBox spacing="10">
-                            <Label text="Bottom Pattern: "/>
-                            <ComboBox fx:id="BottomPattern" editable="true"
-                                prefWidth="150"/>
-                        </HBox>
-                        <HBox>
-                            <Label text="Bottom Main/Only Color: "/>
-                            <ComboBox fx:id="BottomOnlyColor" editable="true"
-                                prefWidth="150"/>
-                        </HBox>
-                        <HBox>
-                            <Label text="Bottom Color 2: " />
-                            <ComboBox fx:id="BottomColor2" editable="true"
-                                prefWidth="150"/>
-                        </HBox>
-                        <HBox>
-                            <Label text="Bottom Color 3: "/>
-                            <ComboBox fx:id="BottomColor3" editable="true"
-                                prefWidth="150"/>
-                        </HBox>
-                        <HBox>
-                            <Label text="Bottom Color 4: "/>
-                            <ComboBox fx:id="BottomColor4" editable="true"
-                                      prefWidth="150"/>
-                        </HBox>
-                        <HBox>
-                            <Label text="Bottom Color 5: "/>
-                            <ComboBox fx:id="BottomColor5" editable="true"
-                                      prefWidth="150"/>
-                        </HBox>
-                    </VBox>
+
+                    <TitledPane text="Bottom" collapsible="true">
+                        <VBox  spacing="5">
+    <!--                style="-fx-border-color: indigo"        -->
+                            <padding>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                            </padding>
+                            <HBox spacing="10">
+                                <Label text="Bottom Pattern: "/>
+                                <ComboBox fx:id="BottomPattern" editable="true"
+                                    prefWidth="150"/>
+                            </HBox>
+                            <HBox>
+                                <Label text="Bottom Main/Only Color: "/>
+                                <ComboBox fx:id="BottomOnlyColor" editable="true"
+                                    prefWidth="150"/>
+                            </HBox>
+                            <HBox>
+                                <Label text="Bottom Color 2: " />
+                                <ComboBox fx:id="BottomColor2" editable="true"
+                                    prefWidth="150"/>
+                            </HBox>
+                            <HBox>
+                                <Label text="Bottom Color 3: "/>
+                                <ComboBox fx:id="BottomColor3" editable="true"
+                                    prefWidth="150"/>
+                            </HBox>
+                            <HBox>
+                                <Label text="Bottom Color 4: "/>
+                                <ComboBox fx:id="BottomColor4" editable="true"
+                                          prefWidth="150"/>
+                            </HBox>
+                            <HBox>
+                                <Label text="Bottom Color 5: "/>
+                                <ComboBox fx:id="BottomColor5" editable="true"
+                                          prefWidth="150"/>
+                            </HBox>
+                        </VBox>
+                    </TitledPane>
                 </HBox>
             </VBox>
         </HBox>

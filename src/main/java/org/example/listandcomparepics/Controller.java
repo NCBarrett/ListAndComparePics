@@ -13,12 +13,9 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public class Controller {
 
@@ -31,7 +28,7 @@ public class Controller {
     @FXML public ComboBox<String> BraSize;
     @FXML public ComboBox<String> ClothesType;
     @FXML public ComboBox<String> ClothesStyle;
-    @FXML public ComboBox<String> TopPattern;
+    @FXML public ComboBox<String> TopPatternType;
     @FXML public ComboBox<String> MainOnlyColor;
     @FXML public ComboBox<String> MainColor2;
     @FXML public ComboBox<String> MainColor3;
@@ -44,6 +41,8 @@ public class Controller {
     @FXML public ComboBox<String> BottomColor5;
     @FXML public ComboBox<String> BottomColor4;
     @FXML public ComboBox<String> Scene;
+    @FXML public ComboBox<String> TopPatternSubType;
+
 
     @FXML public HBox dirPane;
 
@@ -65,8 +64,7 @@ public class Controller {
 
     @FXML public TextField RegEx;
     @FXML public TextField RegEx2;
-    @FXML public TextField endFilePath;
-
+//    @FXML public TextField endFilePath;
 
     private DirectoryWatcherService watcherService;
     private DirectoryListingService listingService;
@@ -153,8 +151,8 @@ public class Controller {
         }
 
         // 3. Pattern Category Divisions
-        if (TopPattern.getItems().isEmpty()) {
-            TopPattern.getItems().setAll("Main with Compliments", "Simple");
+        if (TopPatternType.getItems().isEmpty()) {
+            TopPatternType.getItems().setAll("Main with Compliments", "Simple");
         }
 
         if (BottomPattern.getItems().isEmpty()) {
