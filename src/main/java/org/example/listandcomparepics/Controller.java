@@ -13,15 +13,24 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class Controller {
 
     @FXML public Button dirBrowser;
     @FXML public Button submitBtn;
 
+    @FXML public CheckBox BtmColor3ChBox;
+    @FXML public CheckBox BtmColor4ChBox;
+    @FXML public CheckBox BtmColor5ChBox;
+    @FXML public CheckBox TopColor3ChBox;
+    @FXML public CheckBox TopColor4ChBox;
+    @FXML public CheckBox TopColor5ChBox;    
+    
     @FXML public ComboBox<String> GirlID;
     @FXML public ComboBox<String> EyeColor;
     @FXML public ComboBox<String> HairColor;
@@ -34,7 +43,7 @@ public class Controller {
     @FXML public ComboBox<String> MainColor3;
     @FXML public ComboBox<String> MainColor4;
     @FXML public ComboBox<String> MainColor5;
-    @FXML public ComboBox<String> BottomPattern;
+    @FXML public ComboBox<String> BottomPatternType;
     @FXML public ComboBox<String> BottomOnlyColor;
     @FXML public ComboBox<String> BottomColor2;
     @FXML public ComboBox<String> BottomColor3;
@@ -42,7 +51,6 @@ public class Controller {
     @FXML public ComboBox<String> BottomColor4;
     @FXML public ComboBox<String> Scene;
     @FXML public ComboBox<String> TopPatternSubType;
-
 
     @FXML public HBox dirPane;
 
@@ -64,7 +72,8 @@ public class Controller {
 
     @FXML public TextField RegEx;
     @FXML public TextField RegEx2;
-//    @FXML public TextField endFilePath;
+
+    @FXML public TitledPane BottomsPanel;
 
     private DirectoryWatcherService watcherService;
     private DirectoryListingService listingService;
@@ -125,29 +134,38 @@ public class Controller {
             }
         });
 
-//        // Listen for changes on the parent pattern category dropdown
-//        PatternCategory.valueProperty().addListener((observable, oldValue, newValue) -> {
-//            // If the change is triggered programmatically by our auto-updater flag, skip it
-//            if (isAutoUpdating) {
-//                return;
-//            }
-//
-//            // Pass the newly selected category name to our filter procedure
-//            updatePatternSubcategories(newValue);
-//        });
+        // Listen for changes on the parent pattern category dropdown
+        TopPatternType.valueProperty().addListener((observable, oldValue, newValue) -> {
+            // If the change is triggered programmatically by our auto-updater flag,
+            // skip it
+            if (isAutoUpdating) {
+                return;
+            }
+
+            // Pass the newly selected category name to our filter procedure
+            updatePatternSubcategories(newValue);
+        });
 
         /// =================================================================
         /// INITIALIZE STANDARD DROPDOWN OPTIONS
         /// =================================================================
 
+        // Load saved custom entries from disk if you have previously discovered any
+        loadSavedTags(styleFile, ClothesStyle);
+        loadSavedTags(patternCatFile, TopPatternType);
+        loadSavedTags(patternCatFile, BottomPatternType);
+        loadSavedTags(patternSubFile, TopPatternSubType);
+
         /// 1. Clothes Types (Ordered by frequency of occurrence)
         if (ClothesType.getItems().isEmpty()) {
-            ClothesType.getItems().setAll("Bikini", "Pants & Shirt", "Lingerie", "Other street clothes");
+            ClothesType.getItems().setAll("Bikini", "Pants & Shirt", "Lingerie",
+                    "Other street clothes");
         }
 
         // 2. Clothes Styles
         if (ClothesStyle.getItems().isEmpty()) {
-            ClothesStyle.getItems().setAll("Top and Bottom Match", "Top compliments Bottom", "Top Only");
+            ClothesStyle.getItems().setAll("Top and Bottom Match",
+                    "Top compliments Bottom", "Top Only");
         }
 
         // 3. Pattern Category Divisions
@@ -155,37 +173,83 @@ public class Controller {
             TopPatternType.getItems().setAll("Main with Compliments", "Simple");
         }
 
-        if (BottomPattern.getItems().isEmpty()) {
-            BottomPattern.getItems().setAll("Main with Compliments", "Simple");
+        if (BottomPatternType.getItems().isEmpty()) {
+            BottomPatternType.getItems().setAll("Main with Compliments", "Simple");
         }
 
-        // Load saved custom entries from disk if you have previously discovered any
-        loadSavedTags(styleFile, ClothesStyle);
-//        loadSavedTags(patternCatFile, PatternCategory);
-//        loadSavedTags(patternSubFile, PatternSubcategory);
-//
-//        // Shared color dictionary loader (all color boxes pull from the same persistent file)
-//        loadSavedTags(colorsFile, ColorMain);
-//        loadSavedTags(colorsFile, Color2);
-//        loadSavedTags(colorsFile, Color3);
-//        loadSavedTags(colorsFile, Color4);
-//        loadSavedTags(colorsFile, Color5);
+        // Shared color dictionary loader (all color boxes pull from the same
+        // persistent file)
+        loadSavedTags(colorsFile, MainOnlyColor);
+        loadSavedTags(colorsFile, MainColor2);
+        loadSavedTags(colorsFile, MainColor3);
+        loadSavedTags(colorsFile, MainColor4);
+        loadSavedTags(colorsFile, MainColor5);
+
+        loadSavedTags(colorsFile, BottomOnlyColor);
+        loadSavedTags(colorsFile, BottomColor2);
+        loadSavedTags(colorsFile, BottomColor3);
+        loadSavedTags(colorsFile, BottomColor4);
+        loadSavedTags(colorsFile, BottomColor5);
 
         // Search text listeners triggering reactive list filters
-        textRegEx.textProperty().addListener((observable, oldValue, newValue) -> {
+        textRegEx.textProperty().addListener((observable,
+                                              oldValue, newValue) -> {
             refreshListView();
         });
 
-        rtTextRegEx.textProperty().addListener((observable, oldValue, newValue) -> {
+        rtTextRegEx.textProperty().addListener((observable,
+                                                oldValue, newValue) -> {
             refreshListView();
         });
 
         rtFileListView.setCellFactory(param ->
                 new ImageThumbListCell(currentWatchDir));
+
+        MainColor3.disableProperty().bind(TopColor3ChBox.selectedProperty().not());
+        MainColor4.disableProperty().bind(TopColor4ChBox.selectedProperty().not());
+        MainColor5.disableProperty().bind(TopColor5ChBox.selectedProperty().not());
+        BottomColor3.disableProperty().bind(BtmColor3ChBox.selectedProperty().not());
+        BottomColor4.disableProperty().bind(BtmColor4ChBox.selectedProperty().not());
+        BottomColor5.disableProperty().bind(BtmColor5ChBox.selectedProperty().not());
+
+        BottomsPanel.setCollapsible(true);
+        BottomsPanel.setExpanded(false);
     }
 
-    private void loadSavedTags(Path styleFile, ComboBox<String> clothesStyle) {
+    private void loadSavedTags(Path file, ComboBox<String> comboBox) {
+        // 1. Verify if the target configuration file exists on your disk
+        if (Files.exists(file)) {
+            try (Stream<String> lines = Files.lines(file)) {
+                // Read lines, strip out extra empty spacing, and collect valid entries
+                var items = lines.map(String::trim)
+                        .filter(line -> !line.isEmpty())
+                        .toList();
 
+                // Push the collected historical entries into the dropdown list container
+                comboBox.getItems().setAll(items);
+                System.out.println("Successfully loaded tags from file: " +
+                        file.getFileName());
+            } catch (IOException e) {
+                System.err.println("Could not read tag entries from " + file + ": " +
+                        e.getMessage());
+            }
+        } else {
+            // 2. Fallback initialization defaults if the text files do not exist yet
+            if (comboBox == BraSize) {
+                BraSize.getItems().setAll("M", "L", "XL", "XXL");
+            }
+            if (comboBox == ClothesType) {
+                ClothesType.getItems().setAll("Bikini", "Pants & Shirt", "Lingerie",
+                        "Other street clothes");
+            }
+            if (comboBox == ClothesStyle) {
+                ClothesStyle.getItems().setAll("Top and Bottom Match",
+                        "Top compliments Bottom", "Top Only");
+            }
+            if (comboBox == TopPatternType) {
+                BottomPatternType.getItems().setAll("Main with Compliments", "Simple");
+            }
+        }
     }
 
     private String extractID(String newValue) {
@@ -267,8 +331,10 @@ public class Controller {
         }
 
         if (!rightRaw.isEmpty()) {
-            if (!rightRaw.startsWith("^")) rightRaw = "^" + rightRaw;
-            if (!rightRaw.endsWith("$")) rightRaw = rightRaw + "$";
+            if (!rightRaw.startsWith("^")) rightRaw = "^Girl (" + rightRaw +
+                    ")@(\\(\\d+\\))(.*)";
+
+//            if (!rightRaw.endsWith("$")) rightRaw = rightRaw + "$";
         }
 
         var rtItems = listingService.getDirectoryListing(currentWatchDir, rightRaw,
@@ -282,6 +348,8 @@ public class Controller {
             DirectoryListingService.naturalCompare(file1, file2));
 
         rtFileListView.setItems(rtItems);
+
+        /// needed only when we were adding files to the list
 //        if (!rtItems.isEmpty()) {
 //            rtFileListView.scrollTo(rtItems.size());
 //        }
@@ -304,6 +372,45 @@ public class Controller {
     }
 
     public void submitButton(ActionEvent event) {
+
+    }
+
+    private void updatePatternSubcategories(String parentCategory) {
+        // 1. Clear out any old subcategory options currently in the child box
+        TopPatternSubType.getItems().clear();
+        TopPatternSubType.setValue(null); // Reset the current display selection
+
+        if (parentCategory != null) {
+            String cleanCategory = parentCategory.trim();
+
+            // 2. Check if the user selected "Main with Compliments"
+            if (cleanCategory.equals("Main with Compliments")) {
+                TopPatternSubType.getItems().setAll(
+                        "Leopard skin",
+                        "Polka dot",
+                        "Stripes",
+                        "Floral",
+                        "Other"
+                );
+                System.out.println("Loaded subcategories for Main with Compliments");
+            }
+
+            // 3. Check if the user selected "Simple"
+            if (cleanCategory.equals("Simple")) {
+                TopPatternSubType.getItems().setAll(
+                        "Full color",
+                        "Equal stripes"
+                );
+                System.out.println("Loaded subcategories for Simple");
+            }
+        }
+    }
+
+    public void shutdown() {
+        watcherService.stopWatching();
+    }
+}
+
 //        String oldName = fileListView.getSelectionModel().getSelectedItem();
 //        if (oldName == null) return;
 //
@@ -335,108 +442,3 @@ public class Controller {
 //            refreshListView();
 //            imageViewer.setImage(null);
 //        }
-    }
-
-//    private void loadSavedTags(Path file, ComboBox<String> comboBox) {
-//        // 1. Verify if the target configuration file exists on your disk
-//        if (Files.exists(file)) {
-//            try (Stream<String> lines = Files.lines(file)) {
-//                // Read lines, strip out extra empty spacing, and collect valid entries
-//                var items = lines.map(String::trim)
-//                        .filter(line -> !line.isEmpty())
-//                        .toList();
-//
-//                // Push the collected historical entries into the dropdown list container
-//                comboBox.getItems().setAll(items);
-//                System.out.println("Successfully loaded tags from file: " + file.getFileName());
-//            } catch (IOException e) {
-//                System.err.println("Could not read tag entries from " + file + ": " + e.getMessage());
-//            }
-//        } else {
-//            // 2. Fallback initialization defaults if the text files do not exist yet
-//            if (comboBox == BraSize) {
-//                BraSize.getItems().setAll("M", "L", "XL", "XXL");
-//            }
-//            if (comboBox == ClothesType) {
-//                ClothesType.getItems().setAll("bikini", "Pants & Shirt", "Lingerie", "Other street clothes");
-//            }
-//            if (comboBox == ClothesStyle) {
-//                ClothesStyle.getItems().setAll("Top and Bottom Match", "Top compliments Bottom", "Top Only");
-//            }
-//            if (comboBox == PatternCategory) {
-//                PatternCategory.getItems().setAll("Main with Compliments", "Simple");
-//            }
-//        }
-//    }
-
-//    private void updatePatternSubcategories(String parentCategory) {
-//        // 1. Clear out any old subcategory options currently in the child box
-//        PatternSubcategory.getItems().clear();
-//        PatternSubcategory.setValue(null); // Reset the current display selection
-//
-//        if (parentCategory != null) {
-//            String cleanCategory = parentCategory.trim();
-//
-//            // 2. Check if the user selected "Main with Compliments"
-//            if (cleanCategory.equals("Main with Compliments")) {
-//                PatternSubcategory.getItems().setAll(
-//                        "Leopard skin",
-//                        "Polka dot",
-//                        "Stripes",
-//                        "Floral",
-//                        "Other"
-//                );
-//                System.out.println("Loaded subcategories for Main with Compliments");
-//            }
-//
-//            // 3. Check if the user selected "Simple"
-//            if (cleanCategory.equals("Simple")) {
-//                PatternSubcategory.getItems().setAll(
-//                        "Full color",
-//                        "Equal stripes"
-//                );
-//                System.out.println("Loaded subcategories for Simple");
-//            }
-//        }
-//    }
-
-//
-//    private String findNextAvailableName(String baseNameWithoutExt, String extension) {
-//        Pattern seriesPattern = Pattern.compile("^" + Pattern.quote(baseNameWithoutExt) + " \\((\\d+)\\)");
-//        int highestSeriesNum = 0;
-//        boolean absoluteBaseExists = false;
-//
-//        try (Stream<Path> stream = Files.list(currentWatchDir)) {
-//            for (Path path : stream.toList()) {
-//                String existingName = path.getFileName().toString();
-//
-//                if (existingName.equalsIgnoreCase(baseNameWithoutExt + extension)) {
-//                    absoluteBaseExists = true;
-//                }
-//
-//                Matcher m = seriesPattern.matcher(existingName);
-//                if (m.find()) {
-//                    int num = Integer.parseInt(m.group(1));
-//                    if (num > highestSeriesNum) {
-//                        highestSeriesNum = num;
-//                    }
-//                }
-//            }
-//        } catch (IOException e) {
-//            System.err.println("Could not scan directory for sequence tracking: " + e.getMessage());
-//            return baseNameWithoutExt + extension;
-//        }
-//
-//        if (!absoluteBaseExists && highestSeriesNum == 0) {
-//            return baseNameWithoutExt + extension;
-//        } else {
-//            int nextNum = Math.max(1, highestSeriesNum + 1);
-//            return baseNameWithoutExt + " (" + nextNum + ")" + extension;
-//        }
-//    }
-
-    public void shutdown() {
-        watcherService.stopWatching();
-    }
-}
-

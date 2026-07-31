@@ -17,6 +17,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.CheckBox?>
 <VBox fx:id="root" xmlns:fx="http://javafx.com/fxml"
       fx:controller="org.example.listandcomparepics.Controller">
 
@@ -168,16 +169,19 @@
                                           prefWidth="150"/>
                             </HBox>
                             <HBox>
+                                <CheckBox fx:id="TopColor3ChBox" text=" "/>
                                 <Label text="Color 3: "/>
                                 <ComboBox fx:id="MainColor3" editable="true"
                                           prefWidth="150"/>
                             </HBox>
                             <HBox>
+                                <CheckBox fx:id="TopColor4ChBox" text=" "/>
                                 <Label text="Color 4: "/>
                                 <ComboBox fx:id="MainColor4" editable="true"
                                           prefWidth="150"/>
                             </HBox>
                             <HBox>
+                                <CheckBox fx:id="TopColor5ChBox" text=" "/>
                                 <Label text="Color 5: "/>
                                 <ComboBox fx:id="MainColor5" editable="true"
                                           prefWidth="150"/>
@@ -187,16 +191,16 @@
 
                     <Region prefWidth="20"/>
 
-                    <TitledPane text="Bottom" collapsible="true">
+                    <TitledPane fx:id="BottomsPanel" text="Bottom" collapsible="true">
                         <VBox  spacing="5">
     <!--                style="-fx-border-color: indigo"        -->
                             <padding>
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                             </padding>
                             <HBox spacing="10">
-                                <Label text="Bottom Pattern: "/>
-                                <ComboBox fx:id="BottomPattern" editable="true"
-                                    prefWidth="150"/>
+                                <Label text="Bottom Pattern Type: "/>
+                                <ComboBox fx:id="BottomPatternType" editable="true"
+                                          prefWidth="150"/>
                             </HBox>
                             <HBox>
                                 <Label text="Bottom Main/Only Color: "/>
@@ -209,16 +213,19 @@
                                     prefWidth="150"/>
                             </HBox>
                             <HBox>
+                                <CheckBox fx:id="BtmColor3ChBox" text=" "/>
                                 <Label text="Bottom Color 3: "/>
                                 <ComboBox fx:id="BottomColor3" editable="true"
                                     prefWidth="150"/>
                             </HBox>
                             <HBox>
+                                <CheckBox fx:id="BtmColor4ChBox" text=" "/>
                                 <Label text="Bottom Color 4: "/>
                                 <ComboBox fx:id="BottomColor4" editable="true"
                                           prefWidth="150"/>
                             </HBox>
                             <HBox>
+                                <CheckBox fx:id="BtmColor5ChBox" text=" "/>
                                 <Label text="Bottom Color 5: "/>
                                 <ComboBox fx:id="BottomColor5" editable="true"
                                           prefWidth="150"/>
