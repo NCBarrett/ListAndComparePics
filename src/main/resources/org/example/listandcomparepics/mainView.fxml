@@ -236,14 +236,14 @@
             </VBox>
         </HBox>
 
-        <HBox alignment="CENTER" maxWidth="800"
-              spacing="10" >
+        <HBox alignment="CENTER" maxWidth="800" spacing="10"
+               >
             <!-- prefHeight="35" style="-fx-border-color: black"-->
             <padding>
                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
             </padding>
 
-            <TextField promptText="Select a file and add attributes." prefWidth="700"/>
+            <TextField fx:id="tagString" promptText="Select a file and add attributes." prefWidth="700"/>
             <Button fx:id="submitBtn" text="Submit" onAction="#submitButton"/>
         </HBox>
     </VBox>

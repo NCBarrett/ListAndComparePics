@@ -65,13 +65,13 @@ public class Controller {
 
     @FXML public TextField textRegEx;
     @FXML public TextField rtTextRegEx;
+    @FXML public TextField RegEx;
+    @FXML public TextField RegEx2;
+    @FXML public TextField tagString;
 
     @FXML public VBox leftPane;
     @FXML public VBox rightPane;
     @FXML public VBox root;
-
-    @FXML public TextField RegEx;
-    @FXML public TextField RegEx2;
 
     @FXML public TitledPane BottomsPanel;
 
@@ -96,55 +96,7 @@ public class Controller {
         this.watcherService = new DirectoryWatcherService();
         this.listingService = new DirectoryListingService();
 
-        // Left List Selection Listener
-        fileListView.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue,
-                 newValue) -> {
-                    if (newValue != null) {
-                        System.out.println("Updating left imageViewer");
-                        loadImage(newValue, imageViewer);
-
-                        isAutoUpdating = true;  // Activate cycle protection shield
-                        extractID(newValue);
-                        isAutoUpdating = false; // Deactivate shield
-                    }
-                }
-        );
-
-        // Right List Selection Listener
-        rtFileListView.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue,
-                 newValue) -> {
-                    if (newValue != null) {
-                        System.out.println("Updating right imageViewer");
-                    }
-                }
-        );
-
-        // GirlID ComboBox Listener
-        GirlID.valueProperty().addListener((
-                observable, oldValue, newValue) -> {
-            if (isAutoUpdating) {
-                return; // Stop the feedback refresh loop here
-            }
-            if (newValue != null && !newValue.isBlank()) {
-                String selectedId = newValue.trim();
-                // Dynamically route text to drive your right historical filtering
-                rtTextRegEx.setText("^Girl " + selectedId);
-            }
-        });
-
-        // Listen for changes on the parent pattern category dropdown
-        TopPatternType.valueProperty().addListener((observable, oldValue, newValue) -> {
-            // If the change is triggered programmatically by our auto-updater flag,
-            // skip it
-            if (isAutoUpdating) {
-                return;
-            }
-
-            // Pass the newly selected category name to our filter procedure
-            updatePatternSubcategories(newValue);
-        });
+        // Build in a 'RESET' sequence
 
         /// =================================================================
         /// INITIALIZE STANDARD DROPDOWN OPTIONS
@@ -155,6 +107,24 @@ public class Controller {
         loadSavedTags(patternCatFile, TopPatternType);
         loadSavedTags(patternCatFile, BottomPatternType);
         loadSavedTags(patternSubFile, TopPatternSubType);
+
+        // Shared color dictionary loader (all color boxes pull from the same
+        // persistent file)
+        loadSavedTags(colorsFile, MainOnlyColor);
+        loadSavedTags(colorsFile, MainColor2);
+        loadSavedTags(colorsFile, MainColor3);
+        loadSavedTags(colorsFile, MainColor4);
+        loadSavedTags(colorsFile, MainColor5);
+
+        loadSavedTags(colorsFile, BottomOnlyColor);
+        loadSavedTags(colorsFile, BottomColor2);
+        loadSavedTags(colorsFile, BottomColor3);
+        loadSavedTags(colorsFile, BottomColor4);
+        loadSavedTags(colorsFile, BottomColor5);
+
+        EyeColor.getItems().setAll("Blue", "Black", "Brown", "Green", "Can't See");
+        HairColor.getItems().setAll("Red", "Blond", "Brown", "Black");
+        BraSize.getItems().setAll("Medium", "Large", "Extra Large");
 
         /// 1. Clothes Types (Ordered by frequency of occurrence)
         if (ClothesType.getItems().isEmpty()) {
@@ -176,20 +146,83 @@ public class Controller {
         if (BottomPatternType.getItems().isEmpty()) {
             BottomPatternType.getItems().setAll("Main with Compliments", "Simple");
         }
+        // Left List Selection Listener
+        fileListView.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue,
+                 newValue) -> {
+                    if (newValue != null) {
+                        System.out.println("Updating left imageViewer");
+                        loadImage(newValue, imageViewer);
 
-        // Shared color dictionary loader (all color boxes pull from the same
-        // persistent file)
-        loadSavedTags(colorsFile, MainOnlyColor);
-        loadSavedTags(colorsFile, MainColor2);
-        loadSavedTags(colorsFile, MainColor3);
-        loadSavedTags(colorsFile, MainColor4);
-        loadSavedTags(colorsFile, MainColor5);
+                        isAutoUpdating = true;  // Activate cycle protection shield
+                        extractID(newValue);
+                        isAutoUpdating = false; // Deactivate shield
+                        updateTagPreviewString();
+                    }
+                }
+        );
 
-        loadSavedTags(colorsFile, BottomOnlyColor);
-        loadSavedTags(colorsFile, BottomColor2);
-        loadSavedTags(colorsFile, BottomColor3);
-        loadSavedTags(colorsFile, BottomColor4);
-        loadSavedTags(colorsFile, BottomColor5);
+        // Right List Selection Listener
+        rtFileListView.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue,
+                 newValue) -> {
+                    if (newValue != null) {
+                        System.out.println("Updating right imageViewer");
+                    }
+                }
+        );
+
+        // GirlID ComboBox Listener
+        GirlID.valueProperty().addListener((
+                observable, oldValue, newValue) ->
+        {
+            if (isAutoUpdating) {
+                return; // Stop the feedback refresh loop here
+            }
+            if (newValue != null && !newValue.isBlank()) {
+                String selectedId = newValue.trim();
+                // Dynamically route text to drive your right historical filtering
+                rtTextRegEx.setText("^Girl " + selectedId + "\\b");
+            }
+
+            updateTagPreviewString();
+        });
+
+        HairColor.valueProperty().addListener((observable,
+                                               oldValue, newValue) -> {
+            updateTagPreviewString();
+        });
+
+        EyeColor.valueProperty().addListener((observable,
+                                              oldValue, newValue) -> {
+            updateTagPreviewString();
+        });
+
+        BraSize.valueProperty().addListener((observable,
+                                             oldValue, newValue) -> {
+            updateTagPreviewString();
+        });
+
+        Scene.valueProperty().addListener((observable,
+                                           oldValue, newValue) -> {
+            updateTagPreviewString();
+        });
+
+        // Listen for changes on the parent pattern category dropdown
+        TopPatternType.valueProperty().addListener((observable,
+                                                    oldValue, newValue) -> {
+            // If the change is triggered programmatically by our auto-updater flag,
+            // skip it
+            if (isAutoUpdating) {
+                return;
+            }
+
+            // Pass the newly selected category name to our filter procedure
+            updatePatternSubcategories(newValue);
+        });
+
+
+
 
         // Search text listeners triggering reactive list filters
         textRegEx.textProperty().addListener((observable,
@@ -331,8 +364,7 @@ public class Controller {
         }
 
         if (!rightRaw.isEmpty()) {
-            if (!rightRaw.startsWith("^")) rightRaw = "^Girl (" + rightRaw +
-                    ")@(\\(\\d+\\))(.*)";
+            if (!rightRaw.startsWith("^")) rightRaw = "^Girl " + rightRaw;
 
 //            if (!rightRaw.endsWith("$")) rightRaw = rightRaw + "$";
         }
@@ -406,39 +438,156 @@ public class Controller {
         }
     }
 
+    private void updateTagPreviewString() {
+        StringBuilder tags = new StringBuilder();
+
+        /// 1. Core Subject ID
+        String id = GirlID.getValue();
+        System.out.println("Girl ID: " + id + ".");
+        if (id != null) {
+            if (!id.isEmpty()) {
+                id = id.trim();
+            }
+        }
+
+            System.out.println("Girl ID after trim(): " + id);
+            if (!id.isEmpty()) {
+                id = "empty";
+            }
+
+        tags.append(id);
+
+        /// 2. Eye Color
+        String eyes = EyeColor.getValue();
+        if (eyes == null) {
+            eyes = "unknown";
+        } else {
+            eyes = eyes.trim();
+            if (eyes.isEmpty()) {
+                eyes = "unknown";
+            }
+        }
+        tags.append("; ").append(eyes).append(" eyes");
+
+        /// 3. Hair Color
+        String hair = HairColor.getValue();
+        if (hair == null) {
+            hair = "unknown";
+        } else {
+            hair = hair.trim();
+            if (hair.isEmpty()) {
+                hair = "unknown";
+            }
+        }
+        tags.append("; ").append(hair).append(" hair");
+
+        // 4. Bra Size
+        String size = BraSize.getValue();
+        if (size == null) {
+            size = "unknown";
+        } else {
+            size = size.trim();
+            if (size.isEmpty()) {
+                size = "unknown";
+            }
+        }
+        tags.append("; ").append(size).append(" bra size");
+
+        // 5. Scene Type (The last tag in your convention layout)
+        String sceneText = Scene.getValue();
+        if (sceneText == null) {
+            sceneText = "unknown";
+        } else {
+            sceneText = sceneText.trim();
+            if (sceneText.isEmpty()) {
+                sceneText = "unknown";
+            }
+        }
+        tags.append("; ").append(sceneText);
+
+        System.out.println(tags.toString());
+        // Update the long preview TextField at the bottom of your window
+        tagString.setText(tags.toString());
+    }
+
+//    private void lookupAndPopulateSubjectTraits(String subjectId) {
+//        if (currentWatchDir == null) {
+//            return;
+//        }
+//
+//        boolean foundProfile = false;
+//
+//        // Scan the right-side historical files already loaded in your reference list
+//        for (String historicalFilename : rtFileListView.getItems()) {
+//            if (!foundProfile) {
+//                File imageFile = new File(currentWatchDir.toString(), historicalFilename);
+//
+//                try {
+//                    ImageMetadata metadata = Imaging.getMetadata(imageFile);
+//
+//                    if (metadata instanceof JpegImageMetadata jpegMetadata) {
+//                        // Extract the semicolon-separated Windows XP Keywords tag string
+//                        String[] keywords = jpegMetadata.findEXIFValueWithExactMatch(
+//                                ExifTagConstants.EXIF_TAG_XPKEYWORDS
+//                        ).getStringValue().split(";");
+//
+//                        // Verify that the file actually contains a valid tag structure
+//                        if (keywords.length >= 4) {
+//                            String embeddedId = keywords[0].replace("Girl ", "").trim();
+//
+//                            // If the metadata ID matches our current subject, copy the traits!
+//                            if (embeddedId.equals(subjectId)) {
+//                                String hair = keywords[1].trim();
+//                                String eyes = keywords[2].trim();
+//                                String size = keywords[3].trim();
+//
+//                                // Update your UI dropdown menus programmatically
+//                                HairColor.setValue(hair);
+//                                EyeColor.setValue(eyes);
+//                                BraSize.setValue(size);
+//
+//                                foundProfile = true;
+//                                System.out.println("Profile parsed from historical file: " + historicalFilename);
+//                            }
+//                        }
+//                    }
+//                } catch (Exception ignored) {
+//                    // Skip un-tagged or unreadable files and keep looking
+//                }
+//            }
+//        }
+//
+//        // FALLBACK RESET: If no historical file has been tagged yet, clear traits for manual entry
+//        if (!foundProfile) {
+//            HairColor.setValue("");
+//            EyeColor.setValue("");
+//            BraSize.setValue("");
+//            System.out.println("No historical metadata profile found. Fields cleared for manual setup.");
+//        }
+//    }
+
+    // GirlID ComboBox Listener
+//GirlID.valueProperty().addListener((observable, oldValue, newValue) -> {
+//        if (isAutoUpdating) {
+//            return;
+//        }
+//        if (newValue != null && !newValue.isBlank()) {
+//            String selectedId = newValue.trim();
+//
+//            // 1. Instantly filter the right-pane historical view using your word boundary fix
+//            rtTextRegEx.setText("^Girl " + selectedId + "\\b");
+//
+//            // 2. Force the right-pane items list to refresh immediately
+//            refreshListView();
+//
+//            // 3. Scan the newly refreshed history list, extract embedded traits, and populate UI
+//            isAutoUpdating = true; // Turn on shield to safely update traits
+//            lookupAndPopulateSubjectTraits(selectedId);
+//            isAutoUpdating = false; // Turn off shield
+//        }
+//    });
+
     public void shutdown() {
         watcherService.stopWatching();
     }
 }
-
-//        String oldName = fileListView.getSelectionModel().getSelectedItem();
-//        if (oldName == null) return;
-//
-//        Path sourcePath = currentWatchDir.resolve(oldName);
-//        String targetBaseName = endFilePath.getText().trim();
-//        if (targetBaseName.isEmpty()) return;
-//
-//        String ext = oldName.contains(".") ? oldName.substring(oldName.lastIndexOf(".")) : ".jpg";
-//        String resolvedName = findNextAvailableName(targetBaseName, ext);
-//        Path destinationPath = currentWatchDir.resolve(resolvedName);
-//
-//        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-//        confirm.setTitle("File Will Be Renamed");
-//        confirm.setHeaderText("File '" + oldName + "' will be renamed to '" + resolvedName + "'.");
-//        confirm.setContentText("Do you want to continue?");
-//
-//        var result = confirm.showAndWait();
-//        if (result.isPresent() && result.get() == ButtonType.OK) {
-//            try {
-//                // Direct file rename execution block
-//                Files.move(sourcePath, destinationPath, StandardCopyOption.ATOMIC_MOVE);
-//            } catch (IOException e) {
-//                Alert alert = new Alert(Alert.AlertType.ERROR);
-//                alert.setTitle("File Rename Error");
-//                alert.setHeaderText("Failed to rename file");
-//                alert.setContentText("File could not be renamed: " + e.getMessage());
-//                alert.showAndWait();
-//            }
-//            refreshListView();
-//            imageViewer.setImage(null);
-//        }
