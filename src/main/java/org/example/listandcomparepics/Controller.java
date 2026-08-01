@@ -1,5 +1,7 @@
 package org.example.listandcomparepics;
 
+
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -10,6 +12,11 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import org.apache.commons.imaging.Imaging;
+import org.apache.commons.imaging.common.ImageMetadata;
+import org.apache.commons.imaging.formats.jpeg.JpegImageMetadata;
+import org.apache.commons.imaging.formats.tiff.constants.ExifTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.MicrosoftTagConstants;
 
 import java.io.File;
 import java.io.IOException;
@@ -187,6 +194,26 @@ public class Controller {
 
             updateTagPreviewString();
         });
+        // GirlID ComboBox Listener
+//GirlID.valueProperty().addListener((observable, oldValue, newValue) -> {
+//        if (isAutoUpdating) {
+//            return;
+//        }
+//        if (newValue != null && !newValue.isBlank()) {
+//            String selectedId = newValue.trim();
+//
+//            // 1. Instantly filter the right-pane historical view using your word boundary fix
+//            rtTextRegEx.setText("^Girl " + selectedId + "\\b");
+//
+//            // 2. Force the right-pane items list to refresh immediately
+//            refreshListView();
+//
+//            // 3. Scan the newly refreshed history list, extract embedded traits, and populate UI
+//            isAutoUpdating = true; // Turn on shield to safely update traits
+//            lookupAndPopulateSubjectTraits(selectedId);
+//            isAutoUpdating = false; // Turn off shield
+//        }
+//    });
 
         HairColor.valueProperty().addListener((observable,
                                                oldValue, newValue) -> {
@@ -220,9 +247,6 @@ public class Controller {
             // Pass the newly selected category name to our filter procedure
             updatePatternSubcategories(newValue);
         });
-
-
-
 
         // Search text listeners triggering reactive list filters
         textRegEx.textProperty().addListener((observable,
@@ -445,147 +469,110 @@ public class Controller {
         String id = GirlID.getValue();
         System.out.println("Girl ID: " + id + ".");
         if (id != null) {
+            id = id.trim();
             if (!id.isEmpty()) {
-                id = id.trim();
+                tags.append(id);
+
+                /// 2. Eye Color
+                String eyes = EyeColor.getValue();
+                if (eyes != null) {
+                    eyes = eyes.trim();
+                    if (!eyes.isEmpty()) {
+                        tags.append("; ").append(eyes).append(" eyes");
+                    }
+                }
+
+                /// 3. Hair Color
+                String hair = HairColor.getValue();
+                if (hair == null) {
+                    eyes = eyes.trim();
+                    if (!eyes.isEmpty()) {
+                        tags.append("; ").append(hair).append(" hair");
+                    }
+                }
+                tags.append("; ").append(hair).append(" hair");
+
+                // 4. Bra Size
+                String size = BraSize.getValue();
+                if (size == null) {
+                    size = size.trim();
+                    if (!size.isEmpty()) {
+                        tags.append("; ").append(size).append(" size");
+                    }
+                }
+                tags.append("; ").append(size).append(" bra size");
+
+                // 5. Scene Type (The last tag in your convention layout)
+                String sceneText = Scene.getValue();
+                if (sceneText == null) {
+                    size = sceneText.trim();
+                    if (!sceneText.isEmpty()) {
+                        tags.append("; ").append(sceneText).append(" scene");
+                    }
+                }
+
+                System.out.println(tags.toString());
+                // Update the long preview TextField at the bottom of your window
+                tagString.setText(tags.toString());
             }
         }
-
-            System.out.println("Girl ID after trim(): " + id);
-            if (!id.isEmpty()) {
-                id = "empty";
-            }
-
-        tags.append(id);
-
-        /// 2. Eye Color
-        String eyes = EyeColor.getValue();
-        if (eyes == null) {
-            eyes = "unknown";
-        } else {
-            eyes = eyes.trim();
-            if (eyes.isEmpty()) {
-                eyes = "unknown";
-            }
-        }
-        tags.append("; ").append(eyes).append(" eyes");
-
-        /// 3. Hair Color
-        String hair = HairColor.getValue();
-        if (hair == null) {
-            hair = "unknown";
-        } else {
-            hair = hair.trim();
-            if (hair.isEmpty()) {
-                hair = "unknown";
-            }
-        }
-        tags.append("; ").append(hair).append(" hair");
-
-        // 4. Bra Size
-        String size = BraSize.getValue();
-        if (size == null) {
-            size = "unknown";
-        } else {
-            size = size.trim();
-            if (size.isEmpty()) {
-                size = "unknown";
-            }
-        }
-        tags.append("; ").append(size).append(" bra size");
-
-        // 5. Scene Type (The last tag in your convention layout)
-        String sceneText = Scene.getValue();
-        if (sceneText == null) {
-            sceneText = "unknown";
-        } else {
-            sceneText = sceneText.trim();
-            if (sceneText.isEmpty()) {
-                sceneText = "unknown";
-            }
-        }
-        tags.append("; ").append(sceneText);
-
-        System.out.println(tags.toString());
-        // Update the long preview TextField at the bottom of your window
-        tagString.setText(tags.toString());
     }
 
-//    private void lookupAndPopulateSubjectTraits(String subjectId) {
-//        if (currentWatchDir == null) {
-//            return;
-//        }
-//
-//        boolean foundProfile = false;
-//
-//        // Scan the right-side historical files already loaded in your reference list
-//        for (String historicalFilename : rtFileListView.getItems()) {
-//            if (!foundProfile) {
-//                File imageFile = new File(currentWatchDir.toString(), historicalFilename);
-//
-//                try {
-//                    ImageMetadata metadata = Imaging.getMetadata(imageFile);
-//
-//                    if (metadata instanceof JpegImageMetadata jpegMetadata) {
-//                        // Extract the semicolon-separated Windows XP Keywords tag string
-//                        String[] keywords = jpegMetadata.findEXIFValueWithExactMatch(
-//                                ExifTagConstants.EXIF_TAG_XPKEYWORDS
-//                        ).getStringValue().split(";");
-//
-//                        // Verify that the file actually contains a valid tag structure
-//                        if (keywords.length >= 4) {
-//                            String embeddedId = keywords[0].replace("Girl ", "").trim();
-//
-//                            // If the metadata ID matches our current subject, copy the traits!
-//                            if (embeddedId.equals(subjectId)) {
-//                                String hair = keywords[1].trim();
-//                                String eyes = keywords[2].trim();
-//                                String size = keywords[3].trim();
-//
-//                                // Update your UI dropdown menus programmatically
-//                                HairColor.setValue(hair);
-//                                EyeColor.setValue(eyes);
-//                                BraSize.setValue(size);
-//
-//                                foundProfile = true;
-//                                System.out.println("Profile parsed from historical file: " + historicalFilename);
-//                            }
-//                        }
-//                    }
-//                } catch (Exception ignored) {
-//                    // Skip un-tagged or unreadable files and keep looking
-//                }
-//            }
-//        }
-//
-//        // FALLBACK RESET: If no historical file has been tagged yet, clear traits for manual entry
-//        if (!foundProfile) {
-//            HairColor.setValue("");
-//            EyeColor.setValue("");
-//            BraSize.setValue("");
-//            System.out.println("No historical metadata profile found. Fields cleared for manual setup.");
-//        }
-//    }
+    private void lookupAndPopulateSubjectTraits(String subjectId) {
+        if (currentWatchDir == null) {
+            return;
+        }
 
-    // GirlID ComboBox Listener
-//GirlID.valueProperty().addListener((observable, oldValue, newValue) -> {
-//        if (isAutoUpdating) {
-//            return;
-//        }
-//        if (newValue != null && !newValue.isBlank()) {
-//            String selectedId = newValue.trim();
-//
-//            // 1. Instantly filter the right-pane historical view using your word boundary fix
-//            rtTextRegEx.setText("^Girl " + selectedId + "\\b");
-//
-//            // 2. Force the right-pane items list to refresh immediately
-//            refreshListView();
-//
-//            // 3. Scan the newly refreshed history list, extract embedded traits, and populate UI
-//            isAutoUpdating = true; // Turn on shield to safely update traits
-//            lookupAndPopulateSubjectTraits(selectedId);
-//            isAutoUpdating = false; // Turn off shield
-//        }
-//    });
+        boolean foundProfile = false;
+
+        // Scan the right-side historical files already loaded in your reference list
+        for (String historicalFilename : rtFileListView.getItems()) {
+            if (!foundProfile) {
+                File imageFile = new File(currentWatchDir.toString(), historicalFilename);
+
+                try {
+                    ImageMetadata metadata = Imaging.getMetadata(imageFile);
+
+                    if (metadata instanceof JpegImageMetadata jpegMetadata) {
+                        // Extract the semicolon-separated Windows XP Keywords tag string
+                        String[] keywords = jpegMetadata.findExifValueWithExactMatch(
+                                MicrosoftTagConstants.EXIF_TAG_XPKEYWORDS
+                        ).getStringValue().split(";");
+
+                        // Verify that the file actually contains a valid tag structure
+                        if (keywords.length >= 4) {
+                            String embeddedId = keywords[0].replace("Girl ", "").trim();
+
+                            // If the metadata ID matches our current subject, copy the traits!
+                            if (embeddedId.equals(subjectId)) {
+                                String hair = keywords[1].trim();
+                                String eyes = keywords[2].trim();
+                                String size = keywords[3].trim();
+
+                                // Update your UI dropdown menus programmatically
+                                HairColor.setValue(hair);
+                                EyeColor.setValue(eyes);
+                                BraSize.setValue(size);
+
+                                foundProfile = true;
+                                System.out.println("Profile parsed from historical file: " + historicalFilename);
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {
+                    // Skip un-tagged or unreadable files and keep looking
+                }
+            }
+        }
+
+        // FALLBACK RESET: If no historical file has been tagged yet, clear traits for manual entry
+        if (!foundProfile) {
+            HairColor.setValue("");
+            EyeColor.setValue("");
+            BraSize.setValue("");
+            System.out.println("No historical metadata profile found. Fields cleared for manual setup.");
+        }
+    }
 
     public void shutdown() {
         watcherService.stopWatching();

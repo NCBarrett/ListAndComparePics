@@ -9,6 +9,7 @@ module org.example.listandcomparepics {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
+    requires org.apache.commons.imaging;
 
     opens org.example.listandcomparepics to javafx.fxml;
     exports org.example.listandcomparepics;
