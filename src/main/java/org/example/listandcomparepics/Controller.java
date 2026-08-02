@@ -51,6 +51,7 @@ public class Controller {
     @FXML public ComboBox<String> MainColor4;
     @FXML public ComboBox<String> MainColor5;
     @FXML public ComboBox<String> BottomPatternType;
+    @FXML public ComboBox<String> BottomPatternSubType;
     @FXML public ComboBox<String> BottomOnlyColor;
     @FXML public ComboBox<String> BottomColor2;
     @FXML public ComboBox<String> BottomColor3;
@@ -75,6 +76,10 @@ public class Controller {
     @FXML public TextField RegEx;
     @FXML public TextField RegEx2;
     @FXML public TextField tagString;
+
+    @FXML public ToggleGroup profileModeGroup;
+    @FXML public RadioButton useExistingProfileRadio;
+    @FXML public RadioButton newProfileRadio;
 
     @FXML public VBox leftPane;
     @FXML public VBox rightPane;
@@ -179,6 +184,60 @@ public class Controller {
                 }
         );
 
+        // Listen for when you switch the profile mode radio buttons
+        useExistingProfileRadio.toggleGroupProperty().get().selectedToggleProperty()
+                .addListener((observable, oldToggle,
+                              newToggle) -> {
+            if (newToggle == newProfileRadio) {
+                System.out.println("New Profile radio button selected: Clearing all inputs.");
+
+                // Activate the cycle protection shield so clearing dropdown values
+                // doesn't accidentally trigger other automatic list refreshes
+                isAutoUpdating = true;
+
+                // --- Clear Front Third (Physical Traits) ---
+                EyeColor.setValue("");
+                HairColor.setValue("");
+                BraSize.setValue("");
+
+                // --- Clear Middle Third (Clothing Architecture) ---
+                ClothesType.setValue("");
+                ClothesStyle.setValue("");
+
+                TopPatternType.setValue("");
+                TopPatternSubType.setValue("");
+
+                MainOnlyColor.setValue("");
+                MainColor2.setValue("");
+                MainColor3.setValue("");
+                MainColor4.setValue("");
+                MainColor5.setValue("");
+
+                BottomPatternType.setValue("");
+                BottomOnlyColor.setValue("");
+                BottomColor2.setValue("");
+                BottomColor3.setValue("");
+                BottomColor4.setValue("");
+                BottomColor5.setValue("");
+
+                // --- Clear Back Third (Scene Configuration) ---
+                Scene.setValue("");
+
+                // Uncheck all the extra color expansion check boxes
+                TopColor3ChBox.setSelected(false);
+                TopColor4ChBox.setSelected(false);
+                TopColor5ChBox.setSelected(false);
+                BtmColor3ChBox.setSelected(false);
+                BtmColor4ChBox.setSelected(false);
+                BtmColor5ChBox.setSelected(false);
+
+                // Deactivate the shield and manually force your tag preview bar to update
+                isAutoUpdating = false;
+                updateTagPreviewString();
+            }
+        });
+
+
         // GirlID ComboBox Listener
         GirlID.valueProperty().addListener((
                 observable, oldValue, newValue) ->
@@ -188,32 +247,52 @@ public class Controller {
             }
             if (newValue != null && !newValue.isBlank()) {
                 String selectedId = newValue.trim();
-                // Dynamically route text to drive your right historical filtering
+
+                // 1. Instantly filter the right-pane historical view using your word
+                // boundary fix
                 rtTextRegEx.setText("^Girl " + selectedId + "\\b");
+                refreshListView();
+
+                // 2. Explicitly check the Radio Button Toggle before auto-populating
+                if (useExistingProfileRadio.isSelected()) {
+                    isAutoUpdating = true; // Turn on shield to safely update traits
+                    lookupAndPopulateSubjectTraits(selectedId); // (Your metadata scanner
+                                                                // function)
+                    isAutoUpdating = false; // Turn off shield
+                    System.out.println(
+                            "Profile toggle active: Scanning history for traits.");
+                } else {
+                    // If "New Profile" is selected, safely wipe fields so you can input
+                    // fresh details
+                    isAutoUpdating = true;
+                    EyeColor.setValue("");
+                    HairColor.setValue("");
+                    BraSize.setValue("");
+                    ClothesType.setValue("");
+                    ClothesStyle.setValue("");
+                    TopPatternType.setValue("");
+                    TopPatternSubType.setValue("");
+                    MainOnlyColor.setValue("");
+                    MainColor2.setValue("");
+                    MainColor3.setValue("");
+                    MainColor4.setValue("");
+                    MainColor5.setValue("");
+                    BottomPatternType.setValue("");
+                    BottomOnlyColor.setValue("");
+                    BottomColor2.setValue("");
+                    BottomColor3.setValue("");
+                    BottomColor4.setValue("");
+                    BottomColor5.setValue("");
+                    Scene.setValue("");
+
+                    isAutoUpdating = false;
+                    System.out.println(
+                            "Manual override active: Fields cleared for raw configuration.");
+                }
             }
 
             updateTagPreviewString();
         });
-        // GirlID ComboBox Listener
-//GirlID.valueProperty().addListener((observable, oldValue, newValue) -> {
-//        if (isAutoUpdating) {
-//            return;
-//        }
-//        if (newValue != null && !newValue.isBlank()) {
-//            String selectedId = newValue.trim();
-//
-//            // 1. Instantly filter the right-pane historical view using your word boundary fix
-//            rtTextRegEx.setText("^Girl " + selectedId + "\\b");
-//
-//            // 2. Force the right-pane items list to refresh immediately
-//            refreshListView();
-//
-//            // 3. Scan the newly refreshed history list, extract embedded traits, and populate UI
-//            isAutoUpdating = true; // Turn on shield to safely update traits
-//            lookupAndPopulateSubjectTraits(selectedId);
-//            isAutoUpdating = false; // Turn off shield
-//        }
-//    });
 
         HairColor.valueProperty().addListener((observable,
                                                oldValue, newValue) -> {
@@ -478,36 +557,36 @@ public class Controller {
                 if (eyes != null) {
                     eyes = eyes.trim();
                     if (!eyes.isEmpty()) {
-                        tags.append("; ").append(eyes).append(" eyes");
+                        tags.append(";").append(eyes).append(" eyes");
                     }
                 }
 
                 /// 3. Hair Color
                 String hair = HairColor.getValue();
-                if (hair == null) {
+                if (hair != null) {
                     eyes = eyes.trim();
                     if (!eyes.isEmpty()) {
-                        tags.append("; ").append(hair).append(" hair");
+                        tags.append(";").append(hair).append(" hair");
                     }
                 }
-                tags.append("; ").append(hair).append(" hair");
 
                 // 4. Bra Size
                 String size = BraSize.getValue();
-                if (size == null) {
+                if (size != null) {
                     size = size.trim();
                     if (!size.isEmpty()) {
-                        tags.append("; ").append(size).append(" size");
+                        tags.append(";").append(size).append(" breasts");
                     }
                 }
-                tags.append("; ").append(size).append(" bra size");
 
-                // 5. Scene Type (The last tag in your convention layout)
+                tags.append(";;;");
+
+                /// 5. Scene Type (The last tag in your convention layout)
                 String sceneText = Scene.getValue();
-                if (sceneText == null) {
-                    size = sceneText.trim();
+                if (sceneText != null) {
+                    sceneText = sceneText.trim();
                     if (!sceneText.isEmpty()) {
-                        tags.append("; ").append(sceneText).append(" scene");
+                        tags.append(";").append(sceneText);
                     }
                 }
 
@@ -541,9 +620,10 @@ public class Controller {
 
                         // Verify that the file actually contains a valid tag structure
                         if (keywords.length >= 4) {
-                            String embeddedId = keywords[0].replace("Girl ", "").trim();
+                            String embeddedId = keywords[0];
 
-                            // If the metadata ID matches our current subject, copy the traits!
+                            // If the metadata ID matches our current subject, copy the
+                            // traits!
                             if (embeddedId.equals(subjectId)) {
                                 String hair = keywords[1].trim();
                                 String eyes = keywords[2].trim();
@@ -555,7 +635,8 @@ public class Controller {
                                 BraSize.setValue(size);
 
                                 foundProfile = true;
-                                System.out.println("Profile parsed from historical file: " + historicalFilename);
+                                System.out.println("Profile parsed from historical file: " +
+                                        historicalFilename);
                             }
                         }
                     }
@@ -565,7 +646,8 @@ public class Controller {
             }
         }
 
-        // FALLBACK RESET: If no historical file has been tagged yet, clear traits for manual entry
+        // FALLBACK RESET: If no historical file has been tagged yet, clear traits for
+        // manual entry
         if (!foundProfile) {
             HairColor.setValue("");
             EyeColor.setValue("");
@@ -578,3 +660,4 @@ public class Controller {
         watcherService.stopWatching();
     }
 }
+

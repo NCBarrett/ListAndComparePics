@@ -87,6 +87,25 @@
                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
             </padding>
             <VBox spacing="5">
+                <!-- Profile Mode Toggle Group Container -->
+                <VBox spacing="10" alignment="CENTER_LEFT"
+                      style="-fx-padding: 5 5 5 5; -fx-border-color: black">
+                    <!-- Defining the shared toggle group -->
+                    <fx:define>
+                        <ToggleGroup fx:id="profileModeGroup"/>
+                    </fx:define>
+
+                    <!-- Radio button options -->
+                    <RadioButton fx:id="useExistingProfileRadio"
+                                 text="Use Existing Profile"
+                                 toggleGroup="$profileModeGroup" selected="true"/>
+                    <RadioButton fx:id="newProfileRadio"
+                                 text="New Profile / Manual Override"
+                                 toggleGroup="$profileModeGroup"/>
+                </VBox>
+
+                <Region prefWidth="100" />
+
                 <HBox alignment="BASELINE_CENTER">
                     <Label text="Girl ID: "/>
                     <ComboBox fx:id="GirlID" editable="true" prefWidth="120"
@@ -201,6 +220,11 @@
                                 <Label text="Bottom Pattern Type: "/>
                                 <ComboBox fx:id="BottomPatternType" editable="true"
                                           prefWidth="150"/>
+                            </HBox>
+                            <HBox spacing="10">
+                                <Label text="Bottom Pattern Subtype: "/>
+                                <ComboBox fx:id="BottomPatternSubType"
+                                          editable="true" prefWidth="150"/>
                             </HBox>
                             <HBox>
                                 <Label text="Bottom Main/Only Color: "/>
