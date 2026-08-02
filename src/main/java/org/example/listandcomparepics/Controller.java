@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -86,6 +87,7 @@ public class Controller {
     @FXML public VBox root;
 
     @FXML public TitledPane BottomsPanel;
+    @FXML public ComboBox<String> SceneCat;
 
     private DirectoryWatcherService watcherService;
     private DirectoryListingService listingService;
@@ -119,9 +121,12 @@ public class Controller {
         loadSavedTags(patternCatFile, TopPatternType);
         loadSavedTags(patternCatFile, BottomPatternType);
         loadSavedTags(patternSubFile, TopPatternSubType);
+        loadSavedTags(patternSubFile, BottomPatternSubType);
 
-        // Shared color dictionary loader (all color boxes pull from the same
-        // persistent file)
+        loadAndAssignColorSeries();
+
+        /// Shared color dictionary loader (all color boxes pull from the same
+        /// persistent file)
         loadSavedTags(colorsFile, MainOnlyColor);
         loadSavedTags(colorsFile, MainColor2);
         loadSavedTags(colorsFile, MainColor3);
@@ -144,7 +149,7 @@ public class Controller {
                     "Other street clothes");
         }
 
-        // 2. Clothes Styles
+        /// 2. Clothes Styles
         if (ClothesStyle.getItems().isEmpty()) {
             ClothesStyle.getItems().setAll("Top and Bottom Match",
                     "Top compliments Bottom", "Top Only");
@@ -155,10 +160,25 @@ public class Controller {
             TopPatternType.getItems().setAll("Main with Compliments", "Simple");
         }
 
+        if (TopPatternSubType.getItems().isEmpty()) {
+            TopPatternSubType.getItems().setAll("Leopard skin", "Polka dot", "Stripes",
+                    "Floral",
+                    "Other");
+        }
+
         if (BottomPatternType.getItems().isEmpty()) {
             BottomPatternType.getItems().setAll("Main with Compliments", "Simple");
         }
-        // Left List Selection Listener
+
+        if (BottomPatternSubType.getItems().isEmpty()) {
+            BottomPatternSubType.getItems().setAll("Leopard skin", "Polka dot", "Stripes",
+                    "Floral",
+                    "Other");
+        }
+
+
+
+        /// Left List Selection Listener
         fileListView.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue,
                  newValue) -> {
@@ -174,7 +194,7 @@ public class Controller {
                 }
         );
 
-        // Right List Selection Listener
+        /// Right List Selection Listener
         rtFileListView.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue,
                  newValue) -> {
@@ -184,7 +204,7 @@ public class Controller {
                 }
         );
 
-        // Listen for when you switch the profile mode radio buttons
+        /// Listen for when you switch the profile mode radio buttons
         useExistingProfileRadio.toggleGroupProperty().get().selectedToggleProperty()
                 .addListener((observable, oldToggle,
                               newToggle) -> {
@@ -237,8 +257,7 @@ public class Controller {
             }
         });
 
-
-        // GirlID ComboBox Listener
+        /// GirlID ComboBox Listener
         GirlID.valueProperty().addListener((
                 observable, oldValue, newValue) ->
         {
@@ -314,7 +333,7 @@ public class Controller {
             updateTagPreviewString();
         });
 
-        // Listen for changes on the parent pattern category dropdown
+        /// Listen for changes on the parent pattern category dropdown
         TopPatternType.valueProperty().addListener((observable,
                                                     oldValue, newValue) -> {
             // If the change is triggered programmatically by our auto-updater flag,
@@ -327,7 +346,7 @@ public class Controller {
             updatePatternSubcategories(newValue);
         });
 
-        // Search text listeners triggering reactive list filters
+        /// Search text listeners triggering reactive list filters
         textRegEx.textProperty().addListener((observable,
                                               oldValue, newValue) -> {
             refreshListView();
@@ -570,6 +589,157 @@ public class Controller {
                     }
                 }
 
+//                // =================================================================
+//                // 3. MIDDLE THIRD: COMPLEX CLOTHING ARCHITECTURE
+//                // =================================================================
+//
+//                // --- Main Clothes Attributes ---
+//                String type = ClothesType.getValue();
+//                String style = ClothesStyle.getValue();
+//
+//                if (type == null) {
+//                    type = "unknown";
+//                } else {
+//                    type = type.trim();
+//                    if (type.isEmpty()) {
+//                        type = "unknown";
+//                    }
+//                }
+//                tags.append("; ").append(type);
+//
+//                if (style == null) {
+//                    style = "unknown";
+//                } else {
+//                    style = style.trim();
+//                    if (style.isEmpty()) {
+//                        style = "unknown";
+//                    }
+//                }
+//                tags.append("; ").append(style);
+//
+//                // --- Top/Only Layer Details ---
+//                String topPattern = TopPatternType.getValue();
+//                String topSubpattern = TopPatternSubType.getValue();
+//
+//                if (topPattern != null) {
+//                    topPattern = topPattern.trim();
+//                    if (!topPattern.isEmpty()) {
+//                        tags.append("; Top Pattern: ").append(topPattern);
+//
+//                        // Only add subcategory details if a sub-pattern is selected
+//                        if (topSubpattern != null) {
+//                            topSubpattern = topSubpattern.trim();
+//                            if (!topSubpattern.isEmpty()) {
+//                                tags.append(" (").append(topSubpattern).append(")");
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                // --- Top/Only Color Array Compilation ---
+//                String mainColor = MainOnlyColor.getValue();
+//                if (mainColor != null) {
+//                    mainColor = mainColor.trim();
+//                    if (!mainColor.isEmpty()) {
+//                        tags.append("; Top Colors: ").append(mainColor);
+//
+//                        // Color 2 is always checked if it has text
+//                        String mc2 = MainColor2.getValue();
+//                        if (mc2 != null) {
+//                            mc2 = mc2.trim();
+//                            if (!mc2.isEmpty()) {
+//                                tags.append(", ").append(mc2);
+//                            }
+//                        }
+//
+//                        // Colors 3-5 only get processed if their explicit CheckBox is checked
+//                        if (TopColor3ChBox.isSelected()) {
+//                            String mc3 = MainColor3.getValue();
+//                            if (mc3 != null) {
+//                                mc3 = mc3.trim();
+//                                if (!mc3.isEmpty()) {
+//                                    tags.append(", ").append(mc3);
+//                                }
+//                            }
+//                        }
+//                        if (TopColor4ChBox.isSelected()) {
+//                            String mc4 = MainColor4.getValue();
+//                            if (mc4 != null) {
+//                                mc4 = mc4.trim();
+//                                if (!mc4.isEmpty()) {
+//                                    tags.append(", ").append(mc4);
+//                                }
+//                            }
+//                        }
+//                        if (TopColor5ChBox.isSelected()) {
+//                            String mc5 = MainColor5.getValue();
+//                            if (mc5 != null) {
+//                                mc5 = mc5.trim();
+//                                if (!mc5.isEmpty()) {
+//                                    tags.append(", ").append(mc5);
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                // --- Bottom Layer Details (Only processed if BottomsPanel is expanded) ---
+//                // If the outfit is a "Top Only" style, the panel stays collapsed and we skip this entirely!
+//                if (BottomsPanel.isExpanded()) {
+//                    String btmPattern = BottomPatternType.getValue();
+//                    if (btmPattern != null) {
+//                        btmPattern = btmPattern.trim();
+//                        if (!btmPattern.isEmpty()) {
+//                            tags.append("; Bottom Pattern: ").append(btmPattern);
+//                        }
+//                    }
+//
+//                    String btmColor = BottomOnlyColor.getValue();
+//                    if (btmColor != null) {
+//                        btmColor = btmColor.trim();
+//                        if (!btmColor.isEmpty()) {
+//                            tags.append("; Bottom Colors: ").append(btmColor);
+//
+//                            String bc2 = BottomColor2.getValue();
+//                            if (bc2 != null) {
+//                                bc2 = bc2.trim();
+//                                if (!bc2.isEmpty()) {
+//                                    tags.append(", ").append(bc2);
+//                                }
+//                            }
+//
+//                            if (BtmColor3ChBox.isSelected()) {
+//                                String bc3 = BottomColor3.getValue();
+//                                if (bc3 != null) {
+//                                    bc3 = bc3.trim();
+//                                    if (!bc3.isEmpty()) {
+//                                        tags.append(", ").append(bc3);
+//                                    }
+//                                }
+//                            }
+//                            if (BtmColor4ChBox.isSelected()) {
+//                                String bc4 = BottomColor4.getValue();
+//                                if (bc4 != null) {
+//                                    bc4 = bc4.trim();
+//                                    if (!bc4.isEmpty()) {
+//                                        tags.append(", ").append(bc4);
+//                                    }
+//                                }
+//                            }
+//                            if (BtmColor5ChBox.isSelected()) {
+//                                String bc5 = BottomColor5.getValue();
+//                                if (bc5 != null) {
+//                                    bc5 = bc5.trim();
+//                                    if (!bc5.isEmpty()) {
+//                                        tags.append(", ").append(bc5);
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+
+
                 // 4. Bra Size
                 String size = BraSize.getValue();
                 if (size != null) {
@@ -653,6 +823,68 @@ public class Controller {
             EyeColor.setValue("");
             BraSize.setValue("");
             System.out.println("No historical metadata profile found. Fields cleared for manual setup.");
+        }
+    }
+
+    // =================================================================
+// 1. THE DEDICATED PERSISTENCE & ASSIGNMENT METHOD
+// =================================================================
+    private void loadAndAssignColorSeries() {
+        List<String> loadedColors = java.util.Collections.emptyList();
+
+        // Read your single, master list of colors from disk
+        if (Files.exists(colorsFile)) {
+            try (Stream<String> lines = Files.lines(colorsFile)) {
+                loadedColors = lines.map(String::trim)
+                        .filter(line -> !line.isEmpty())
+                        .toList();
+            } catch (IOException e) {
+                System.err.println("Failed reading color references: " + e.getMessage());
+            }
+        }
+
+        // Assign that exact same master list of values to your primary inputs
+        MainOnlyColor.getItems().setAll(loadedColors);
+        BottomOnlyColor.getItems().setAll(loadedColors);
+
+        // Use your reflection loop to instantly update the rest of the series rows
+        // This populates MainColor2 through MainColor5 and BottomColor2 through BottomColor5
+        assignValuesToComboBoxGroup("MainColor", 2, 5, loadedColors);
+        assignValuesToComboBoxGroup("BottomColor", 2, 5, loadedColors);
+
+        System.out.println("Master color list successfully broadcasted to all dropdowns.");
+    }
+
+    public void assignValuesToComboBoxGroup(String prefix, int startNum, int endNum, List<String> itemsToAssign) {
+        int i = startNum;
+
+        while (i <= endNum) {
+            // 1. Construct the exact field identifier (e.g., "MainColor3")
+            String targetFieldName = prefix + i;
+
+            try {
+                // 2. Locate the field securely, even while the UI is initializing
+                java.lang.reflect.Field field = this.getClass().getDeclaredField(targetFieldName);
+
+                // 3. Temporarily bypass access restrictions to grab the FXML injection instance
+                field.setAccessible(true);
+
+                @SuppressWarnings("unchecked")
+                ComboBox<String> comboBox = (ComboBox<String>) field.get(this);
+
+                if (comboBox != null) {
+                    // 4. Feed the custom series of values straight into the dropdown items list
+                    comboBox.getItems().setAll(itemsToAssign);
+                    System.out.println("Programmatically initialized values for: " + targetFieldName);
+                }
+
+            } catch (NoSuchFieldException e) {
+                System.err.println("Reflection Error: No variable found matching: " + targetFieldName);
+            } catch (IllegalAccessException e) {
+                System.err.println("Reflection Security Exception for field: " + targetFieldName);
+            }
+
+            i++; // Increment step to evaluate the next box in the series
         }
     }
 

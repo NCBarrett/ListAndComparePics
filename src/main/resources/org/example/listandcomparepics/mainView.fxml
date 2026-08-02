@@ -104,7 +104,7 @@
                                  toggleGroup="$profileModeGroup"/>
                 </VBox>
 
-                <Region prefWidth="100" />
+                <Region prefWidth="75" />
 
                 <HBox alignment="BASELINE_CENTER">
                     <Label text="Girl ID: "/>
@@ -124,11 +124,7 @@
                     <ComboBox fx:id="BraSize" editable="true" prefWidth="100"/>
                 </HBox>
                 <Region prefWidth="20"/>
-                <VBox  alignment="CENTER">
-                    <!--                    style="-fx-border-color: orange"    -->
-                    <Label text="Scene: "/>
-                    <ComboBox fx:id="Scene" editable="true" prefWidth="150"/>
-                </VBox>
+
             </VBox>
 
             <Region prefWidth="50"/>
@@ -257,6 +253,16 @@
                         </VBox>
                     </TitledPane>
                 </HBox>
+            </VBox>
+
+            <Region prefWidth="50"/>
+
+            <VBox  alignment="CENTER">
+                <!--                    style="-fx-border-color: orange"    -->
+                <Label text="Scene Category: "/>
+                <ComboBox fx:id="SceneCat" editable="true" prefWidth="150"/>
+                <Label text="Scene: "/>
+                <ComboBox fx:id="Scene" editable="true" prefWidth="150"/>
             </VBox>
         </HBox>
 
