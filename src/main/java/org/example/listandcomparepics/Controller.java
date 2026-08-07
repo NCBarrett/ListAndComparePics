@@ -117,65 +117,19 @@ public class Controller {
         /// =================================================================
 
         // Load saved custom entries from disk if you have previously discovered any
-        loadSavedTags(styleFile, ClothesStyle);
-        loadSavedTags(patternCatFile, TopPatternType);
-        loadSavedTags(patternCatFile, BottomPatternType);
-        loadSavedTags(patternSubFile, TopPatternSubType);
-        loadSavedTags(patternSubFile, BottomPatternSubType);
 
-        loadAndAssignColorSeries();
+        loadAllSavedTags();
 
         /// Shared color dictionary loader (all color boxes pull from the same
         /// persistent file)
-        loadSavedTags(colorsFile, MainOnlyColor);
-        loadSavedTags(colorsFile, MainColor2);
-        loadSavedTags(colorsFile, MainColor3);
-        loadSavedTags(colorsFile, MainColor4);
-        loadSavedTags(colorsFile, MainColor5);
-
-        loadSavedTags(colorsFile, BottomOnlyColor);
-        loadSavedTags(colorsFile, BottomColor2);
-        loadSavedTags(colorsFile, BottomColor3);
-        loadSavedTags(colorsFile, BottomColor4);
-        loadSavedTags(colorsFile, BottomColor5);
+        loadAndAssignColorSeries();
 
         EyeColor.getItems().setAll("Blue", "Black", "Brown", "Green", "Can't See");
         HairColor.getItems().setAll("Red", "Blond", "Brown", "Black");
         BraSize.getItems().setAll("Medium", "Large", "Extra Large");
 
-        /// 1. Clothes Types (Ordered by frequency of occurrence)
-        if (ClothesType.getItems().isEmpty()) {
-            ClothesType.getItems().setAll("Bikini", "Pants & Shirt", "Lingerie",
-                    "Other street clothes");
-        }
-
-        /// 2. Clothes Styles
-        if (ClothesStyle.getItems().isEmpty()) {
-            ClothesStyle.getItems().setAll("Top and Bottom Match",
-                    "Top compliments Bottom", "Top Only");
-        }
-
-        // 3. Pattern Category Divisions
-        if (TopPatternType.getItems().isEmpty()) {
-            TopPatternType.getItems().setAll("Main with Compliments", "Simple");
-        }
-
-        if (TopPatternSubType.getItems().isEmpty()) {
-            TopPatternSubType.getItems().setAll("Leopard skin", "Polka dot", "Stripes",
-                    "Floral",
-                    "Other");
-        }
-
-        if (BottomPatternType.getItems().isEmpty()) {
-            BottomPatternType.getItems().setAll("Main with Compliments", "Simple");
-        }
-
-        if (BottomPatternSubType.getItems().isEmpty()) {
-            BottomPatternSubType.getItems().setAll("Leopard skin", "Polka dot", "Stripes",
-                    "Floral",
-                    "Other");
-        }
-
+        /// Load clothes details dropdowns
+        loadClothesDetails();
 
 
         /// Left List Selection Listener
@@ -211,48 +165,7 @@ public class Controller {
             if (newToggle == newProfileRadio) {
                 System.out.println("New Profile radio button selected: Clearing all inputs.");
 
-                // Activate the cycle protection shield so clearing dropdown values
-                // doesn't accidentally trigger other automatic list refreshes
-                isAutoUpdating = true;
-
-                // --- Clear Front Third (Physical Traits) ---
-                EyeColor.setValue("");
-                HairColor.setValue("");
-                BraSize.setValue("");
-
-                // --- Clear Middle Third (Clothing Architecture) ---
-                ClothesType.setValue("");
-                ClothesStyle.setValue("");
-
-                TopPatternType.setValue("");
-                TopPatternSubType.setValue("");
-
-                MainOnlyColor.setValue("");
-                MainColor2.setValue("");
-                MainColor3.setValue("");
-                MainColor4.setValue("");
-                MainColor5.setValue("");
-
-                BottomPatternType.setValue("");
-                BottomOnlyColor.setValue("");
-                BottomColor2.setValue("");
-                BottomColor3.setValue("");
-                BottomColor4.setValue("");
-                BottomColor5.setValue("");
-
-                // --- Clear Back Third (Scene Configuration) ---
-                Scene.setValue("");
-
-                // Uncheck all the extra color expansion check boxes
-                TopColor3ChBox.setSelected(false);
-                TopColor4ChBox.setSelected(false);
-                TopColor5ChBox.setSelected(false);
-                BtmColor3ChBox.setSelected(false);
-                BtmColor4ChBox.setSelected(false);
-                BtmColor5ChBox.setSelected(false);
-
-                // Deactivate the shield and manually force your tag preview bar to update
-                isAutoUpdating = false;
+                clearAll();
                 updateTagPreviewString();
             }
         });
@@ -283,28 +196,7 @@ public class Controller {
                 } else {
                     // If "New Profile" is selected, safely wipe fields so you can input
                     // fresh details
-                    isAutoUpdating = true;
-                    EyeColor.setValue("");
-                    HairColor.setValue("");
-                    BraSize.setValue("");
-                    ClothesType.setValue("");
-                    ClothesStyle.setValue("");
-                    TopPatternType.setValue("");
-                    TopPatternSubType.setValue("");
-                    MainOnlyColor.setValue("");
-                    MainColor2.setValue("");
-                    MainColor3.setValue("");
-                    MainColor4.setValue("");
-                    MainColor5.setValue("");
-                    BottomPatternType.setValue("");
-                    BottomOnlyColor.setValue("");
-                    BottomColor2.setValue("");
-                    BottomColor3.setValue("");
-                    BottomColor4.setValue("");
-                    BottomColor5.setValue("");
-                    Scene.setValue("");
-
-                    isAutoUpdating = false;
+                    clearAll();
                     System.out.println(
                             "Manual override active: Fields cleared for raw configuration.");
                 }
@@ -371,6 +263,86 @@ public class Controller {
         BottomsPanel.setExpanded(false);
     }
 
+    private void loadClothesDetails() {
+        /// 1. Clothes Types (Ordered by frequency of occurrence)
+        if (ClothesType.getItems().isEmpty()) {
+            ClothesType.getItems().setAll("Bikini", "Bikini & Pants", "Lingerie",
+                    "Pants & Shirt", "Other street clothes");
+        }
+
+        /// 2. Clothes Styles
+        if (ClothesStyle.getItems().isEmpty()) {
+            ClothesStyle.getItems().setAll("Top and Bottom Match",
+                    "Top compliments Bottom", "Top Only");
+        }
+
+        /// 3. Pattern Category Divisions
+        if (TopPatternType.getItems().isEmpty()) {
+            TopPatternType.getItems().setAll("Main with Compliments", "Simple");
+        }
+
+        if (TopPatternSubType.getItems().isEmpty()) {
+            TopPatternSubType.getItems().setAll("Leopard skin", "Polka dot", "Stripes",
+                    "Floral",
+                    "Other");
+        }
+
+        if (BottomPatternType.getItems().isEmpty()) {
+            BottomPatternType.getItems().setAll("Main with Compliments", "Simple");
+        }
+
+        if (BottomPatternSubType.getItems().isEmpty()) {
+            BottomPatternSubType.getItems().setAll("Leopard skin", "Polka dot", "Stripes",
+                    "Floral",
+                    "Other");
+        }
+    }
+
+    private void clearAll() {
+        // Activate the cycle protection shield so clearing dropdown values
+        // doesn't accidentally trigger other automatic list refreshes
+        isAutoUpdating = true;
+
+        // --- Clear Front Third (Physical Traits) ---
+        EyeColor.setValue("");
+        HairColor.setValue("");
+        BraSize.setValue("");
+
+        // --- Clear Middle Third (Clothing Architecture) ---
+        ClothesType.setValue("");
+        ClothesStyle.setValue("");
+
+        TopPatternType.setValue("");
+        TopPatternSubType.setValue("");
+
+        MainOnlyColor.setValue("");
+        MainColor2.setValue("");
+        MainColor3.setValue("");
+        MainColor4.setValue("");
+        MainColor5.setValue("");
+
+        BottomPatternType.setValue("");
+        BottomOnlyColor.setValue("");
+        BottomColor2.setValue("");
+        BottomColor3.setValue("");
+        BottomColor4.setValue("");
+        BottomColor5.setValue("");
+
+        // --- Clear Back Third (Scene Configuration) ---
+        Scene.setValue("");
+
+        // Uncheck all the extra color expansion check boxes
+        TopColor3ChBox.setSelected(false);
+        TopColor4ChBox.setSelected(false);
+        TopColor5ChBox.setSelected(false);
+        BtmColor3ChBox.setSelected(false);
+        BtmColor4ChBox.setSelected(false);
+        BtmColor5ChBox.setSelected(false);
+
+        // Deactivate the shield and manually force your tag preview bar to update
+        isAutoUpdating = false;
+    }
+
     private void loadSavedTags(Path file, ComboBox<String> comboBox) {
         // 1. Verify if the target configuration file exists on your disk
         if (Files.exists(file)) {
@@ -423,7 +395,6 @@ public class Controller {
     public void setStage(Stage stage) {
         this.stage = stage;
     }
-
 
     @FXML
     private void onDirBrowserClick() {
@@ -526,7 +497,24 @@ public class Controller {
     }
 
     public void submitButton(ActionEvent event) {
-
+//        String selectedFile = fileListView.getSelectionModel().getSelectedItem();
+//        if (selectedFile == null || currentWatchDir == null) {
+//            return;
+//        }
+//
+//        File imageFile = new File(currentWatchDir.toString(), selectedFile);
+//        String tags = tagString.getText();
+//
+//        if (tags == null || tags.isBlank()) {
+//            Alert alert = new Alert(Alert.AlertType.WARNING);
+//            alert.setTitle("No Tags");
+//            alert.setHeaderText("Nothing to save");
+//            alert.setContentText("Build a tag string before submitting.");
+//            alert.showAndWait();
+//            return;
+//        }
+//
+//        writeTagsToMetadata(imageFile, tags);
     }
 
     private void updatePatternSubcategories(String parentCategory) {
@@ -589,157 +577,6 @@ public class Controller {
                     }
                 }
 
-//                // =================================================================
-//                // 3. MIDDLE THIRD: COMPLEX CLOTHING ARCHITECTURE
-//                // =================================================================
-//
-//                // --- Main Clothes Attributes ---
-//                String type = ClothesType.getValue();
-//                String style = ClothesStyle.getValue();
-//
-//                if (type == null) {
-//                    type = "unknown";
-//                } else {
-//                    type = type.trim();
-//                    if (type.isEmpty()) {
-//                        type = "unknown";
-//                    }
-//                }
-//                tags.append("; ").append(type);
-//
-//                if (style == null) {
-//                    style = "unknown";
-//                } else {
-//                    style = style.trim();
-//                    if (style.isEmpty()) {
-//                        style = "unknown";
-//                    }
-//                }
-//                tags.append("; ").append(style);
-//
-//                // --- Top/Only Layer Details ---
-//                String topPattern = TopPatternType.getValue();
-//                String topSubpattern = TopPatternSubType.getValue();
-//
-//                if (topPattern != null) {
-//                    topPattern = topPattern.trim();
-//                    if (!topPattern.isEmpty()) {
-//                        tags.append("; Top Pattern: ").append(topPattern);
-//
-//                        // Only add subcategory details if a sub-pattern is selected
-//                        if (topSubpattern != null) {
-//                            topSubpattern = topSubpattern.trim();
-//                            if (!topSubpattern.isEmpty()) {
-//                                tags.append(" (").append(topSubpattern).append(")");
-//                            }
-//                        }
-//                    }
-//                }
-//
-//                // --- Top/Only Color Array Compilation ---
-//                String mainColor = MainOnlyColor.getValue();
-//                if (mainColor != null) {
-//                    mainColor = mainColor.trim();
-//                    if (!mainColor.isEmpty()) {
-//                        tags.append("; Top Colors: ").append(mainColor);
-//
-//                        // Color 2 is always checked if it has text
-//                        String mc2 = MainColor2.getValue();
-//                        if (mc2 != null) {
-//                            mc2 = mc2.trim();
-//                            if (!mc2.isEmpty()) {
-//                                tags.append(", ").append(mc2);
-//                            }
-//                        }
-//
-//                        // Colors 3-5 only get processed if their explicit CheckBox is checked
-//                        if (TopColor3ChBox.isSelected()) {
-//                            String mc3 = MainColor3.getValue();
-//                            if (mc3 != null) {
-//                                mc3 = mc3.trim();
-//                                if (!mc3.isEmpty()) {
-//                                    tags.append(", ").append(mc3);
-//                                }
-//                            }
-//                        }
-//                        if (TopColor4ChBox.isSelected()) {
-//                            String mc4 = MainColor4.getValue();
-//                            if (mc4 != null) {
-//                                mc4 = mc4.trim();
-//                                if (!mc4.isEmpty()) {
-//                                    tags.append(", ").append(mc4);
-//                                }
-//                            }
-//                        }
-//                        if (TopColor5ChBox.isSelected()) {
-//                            String mc5 = MainColor5.getValue();
-//                            if (mc5 != null) {
-//                                mc5 = mc5.trim();
-//                                if (!mc5.isEmpty()) {
-//                                    tags.append(", ").append(mc5);
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//
-//                // --- Bottom Layer Details (Only processed if BottomsPanel is expanded) ---
-//                // If the outfit is a "Top Only" style, the panel stays collapsed and we skip this entirely!
-//                if (BottomsPanel.isExpanded()) {
-//                    String btmPattern = BottomPatternType.getValue();
-//                    if (btmPattern != null) {
-//                        btmPattern = btmPattern.trim();
-//                        if (!btmPattern.isEmpty()) {
-//                            tags.append("; Bottom Pattern: ").append(btmPattern);
-//                        }
-//                    }
-//
-//                    String btmColor = BottomOnlyColor.getValue();
-//                    if (btmColor != null) {
-//                        btmColor = btmColor.trim();
-//                        if (!btmColor.isEmpty()) {
-//                            tags.append("; Bottom Colors: ").append(btmColor);
-//
-//                            String bc2 = BottomColor2.getValue();
-//                            if (bc2 != null) {
-//                                bc2 = bc2.trim();
-//                                if (!bc2.isEmpty()) {
-//                                    tags.append(", ").append(bc2);
-//                                }
-//                            }
-//
-//                            if (BtmColor3ChBox.isSelected()) {
-//                                String bc3 = BottomColor3.getValue();
-//                                if (bc3 != null) {
-//                                    bc3 = bc3.trim();
-//                                    if (!bc3.isEmpty()) {
-//                                        tags.append(", ").append(bc3);
-//                                    }
-//                                }
-//                            }
-//                            if (BtmColor4ChBox.isSelected()) {
-//                                String bc4 = BottomColor4.getValue();
-//                                if (bc4 != null) {
-//                                    bc4 = bc4.trim();
-//                                    if (!bc4.isEmpty()) {
-//                                        tags.append(", ").append(bc4);
-//                                    }
-//                                }
-//                            }
-//                            if (BtmColor5ChBox.isSelected()) {
-//                                String bc5 = BottomColor5.getValue();
-//                                if (bc5 != null) {
-//                                    bc5 = bc5.trim();
-//                                    if (!bc5.isEmpty()) {
-//                                        tags.append(", ").append(bc5);
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-
-
                 // 4. Bra Size
                 String size = BraSize.getValue();
                 if (size != null) {
@@ -750,6 +587,155 @@ public class Controller {
                 }
 
                 tags.append(";;;");
+                // =================================================================
+                // 3. MIDDLE THIRD: COMPLEX CLOTHING ARCHITECTURE
+                // =================================================================
+
+                // --- Main Clothes Attributes ---
+                String type = ClothesType.getValue();
+                String style = ClothesStyle.getValue();
+
+                if (type == null) {
+                    type = "unknown";
+                } else {
+                    type = type.trim();
+                    if (type.isEmpty()) {
+                        type = "unknown";
+                    }
+                }
+                tags.append("; ").append(type);
+
+                if (style == null) {
+                    style = "unknown";
+                } else {
+                    style = style.trim();
+                    if (style.isEmpty()) {
+                        style = "unknown";
+                    }
+                }
+                tags.append("; ").append(style);
+
+                // --- Top/Only Layer Details ---
+                String topPattern = TopPatternType.getValue();
+                String topSubpattern = TopPatternSubType.getValue();
+
+                if (topPattern != null) {
+                    topPattern = topPattern.trim();
+                    if (!topPattern.isEmpty()) {
+                        tags.append("; Top Pattern: ").append(topPattern);
+
+                        // Only add subcategory details if a sub-pattern is selected
+                        if (topSubpattern != null) {
+                            topSubpattern = topSubpattern.trim();
+                            if (!topSubpattern.isEmpty()) {
+                                tags.append(" (").append(topSubpattern).append(")");
+                            }
+                        }
+                    }
+                }
+
+                // --- Top/Only Color Array Compilation ---
+                String mainColor = MainOnlyColor.getValue();
+                if (mainColor != null) {
+                    mainColor = mainColor.trim();
+                    if (!mainColor.isEmpty()) {
+                        tags.append("; Top Colors: ").append(mainColor);
+
+                        // Color 2 is always checked if it has text
+                        String mc2 = MainColor2.getValue();
+                        if (mc2 != null) {
+                            mc2 = mc2.trim();
+                            if (!mc2.isEmpty()) {
+                                tags.append(", ").append(mc2);
+                            }
+                        }
+
+                        // Colors 3-5 only get processed if their explicit CheckBox is checked
+                        if (TopColor3ChBox.isSelected()) {
+                            String mc3 = MainColor3.getValue();
+                            if (mc3 != null) {
+                                mc3 = mc3.trim();
+                                if (!mc3.isEmpty()) {
+                                    tags.append(", ").append(mc3);
+                                }
+                            }
+                        }
+                        if (TopColor4ChBox.isSelected()) {
+                            String mc4 = MainColor4.getValue();
+                            if (mc4 != null) {
+                                mc4 = mc4.trim();
+                                if (!mc4.isEmpty()) {
+                                    tags.append(", ").append(mc4);
+                                }
+                            }
+                        }
+                        if (TopColor5ChBox.isSelected()) {
+                            String mc5 = MainColor5.getValue();
+                            if (mc5 != null) {
+                                mc5 = mc5.trim();
+                                if (!mc5.isEmpty()) {
+                                    tags.append(", ").append(mc5);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // --- Bottom Layer Details (Only processed if BottomsPanel is expanded) ---
+                // If the outfit is a "Top Only" style, the panel stays collapsed and we skip this entirely!
+                if (BottomsPanel.isExpanded()) {
+                    String btmPattern = BottomPatternType.getValue();
+                    if (btmPattern != null) {
+                        btmPattern = btmPattern.trim();
+                        if (!btmPattern.isEmpty()) {
+                            tags.append("; Bottom Pattern: ").append(btmPattern);
+                        }
+                    }
+
+                    String btmColor = BottomOnlyColor.getValue();
+                    if (btmColor != null) {
+                        btmColor = btmColor.trim();
+                        if (!btmColor.isEmpty()) {
+                            tags.append("; Bottom Colors: ").append(btmColor);
+
+                            String bc2 = BottomColor2.getValue();
+                            if (bc2 != null) {
+                                bc2 = bc2.trim();
+                                if (!bc2.isEmpty()) {
+                                    tags.append(", ").append(bc2);
+                                }
+                            }
+
+                            if (BtmColor3ChBox.isSelected()) {
+                                String bc3 = BottomColor3.getValue();
+                                if (bc3 != null) {
+                                    bc3 = bc3.trim();
+                                    if (!bc3.isEmpty()) {
+                                        tags.append(", ").append(bc3);
+                                    }
+                                }
+                            }
+                            if (BtmColor4ChBox.isSelected()) {
+                                String bc4 = BottomColor4.getValue();
+                                if (bc4 != null) {
+                                    bc4 = bc4.trim();
+                                    if (!bc4.isEmpty()) {
+                                        tags.append(", ").append(bc4);
+                                    }
+                                }
+                            }
+                            if (BtmColor5ChBox.isSelected()) {
+                                String bc5 = BottomColor5.getValue();
+                                if (bc5 != null) {
+                                    bc5 = bc5.trim();
+                                    if (!bc5.isEmpty()) {
+                                        tags.append(", ").append(bc5);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
 
                 /// 5. Scene Type (The last tag in your convention layout)
                 String sceneText = Scene.getValue();
@@ -827,8 +813,8 @@ public class Controller {
     }
 
     // =================================================================
-// 1. THE DEDICATED PERSISTENCE & ASSIGNMENT METHOD
-// =================================================================
+    // 1. THE DEDICATED PERSISTENCE & ASSIGNMENT METHOD
+    // =================================================================
     private void loadAndAssignColorSeries() {
         List<String> loadedColors = java.util.Collections.emptyList();
 
@@ -855,7 +841,27 @@ public class Controller {
         System.out.println("Master color list successfully broadcasted to all dropdowns.");
     }
 
-    public void assignValuesToComboBoxGroup(String prefix, int startNum, int endNum, List<String> itemsToAssign) {
+    public void loadAllSavedTags() {
+        loadSavedTags(styleFile, ClothesStyle);
+        loadSavedTags(patternCatFile, TopPatternType);
+        loadSavedTags(patternCatFile, BottomPatternType);
+        loadSavedTags(patternSubFile, TopPatternSubType);
+        loadSavedTags(patternSubFile, BottomPatternSubType);
+        loadSavedTags(colorsFile, MainOnlyColor);
+        loadSavedTags(colorsFile, MainColor2);
+        loadSavedTags(colorsFile, MainColor3);
+        loadSavedTags(colorsFile, MainColor4);
+        loadSavedTags(colorsFile, MainColor5);
+
+        loadSavedTags(colorsFile, BottomOnlyColor);
+        loadSavedTags(colorsFile, BottomColor2);
+        loadSavedTags(colorsFile, BottomColor3);
+        loadSavedTags(colorsFile, BottomColor4);
+        loadSavedTags(colorsFile, BottomColor5);
+    }
+
+    public void assignValuesToComboBoxGroup(String prefix, int startNum, int endNum,
+                                            List<String> itemsToAssign) {
         int i = startNum;
 
         while (i <= endNum) {
@@ -887,6 +893,50 @@ public class Controller {
             i++; // Increment step to evaluate the next box in the series
         }
     }
+
+//    private void writeTagsToMetadata(File imageFile, String tagString) {
+//        try {
+//            TiffOutputSet outputSet;
+//            ImageMetadata metadata = Imaging.getMetadata(imageFile);
+//
+//            if (metadata instanceof JpegImageMetadata jpegMetadata
+//                    && jpegMetadata.getExif() != null) {
+//                // Preserve any existing EXIF data already on the file
+//                outputSet = jpegMetadata.getExif().getOutputSet();
+//            } else {
+//                // No existing EXIF data — start a fresh output set
+//                outputSet = new TiffOutputSet();
+//            }
+//
+//            TiffOutputDirectory rootDir = outputSet.getOrCreateRootDirectory();
+//
+//            // Remove any prior XPKeywords value before setting the new one —
+//            // Commons Imaging throws if the field already exists
+//            rootDir.removeField(MicrosoftTagConstants.EXIF_TAG_XPKEYWORDS);
+//            rootDir.add(MicrosoftTagConstants.EXIF_TAG_XPKEYWORDS, tagString);
+//
+//            // Write to a temp file first, then replace the original —
+//            // ExifRewriter can't write in-place on the same file it's reading from
+//            File tempFile = File.createTempFile("tagged_", ".jpg", imageFile.getParentFile());
+//
+//            try (var outputStream = new java.io.FileOutputStream(tempFile)) {
+//                new ExifRewriter().updateExifMetadataLossless(imageFile, outputStream, outputSet);
+//            }
+//
+//            Files.move(tempFile.toPath(), imageFile.toPath(),
+//                    StandardCopyOption.REPLACE_EXISTING);
+//
+//            System.out.println("Tags written successfully to " + imageFile.getName());
+//
+//        } catch (Exception e) {
+//            Alert alert = new Alert(Alert.AlertType.ERROR);
+//            alert.setTitle("Tag Write Error");
+//            alert.setHeaderText("Failed to write tags to file");
+//            alert.setContentText("Could not write metadata to " + imageFile.getName()
+//                    + ": " + e.getMessage());
+//            alert.showAndWait();
+//        }
+//    }
 
     public void shutdown() {
         watcherService.stopWatching();
