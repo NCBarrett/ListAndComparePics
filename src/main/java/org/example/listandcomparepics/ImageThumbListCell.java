@@ -42,7 +42,8 @@ public class ImageThumbListCell extends ListCell<String> {
             File imageFile = new File(directoryProvider.toString(), filename);
 
             try {
-                /// Width=60, Height=60, preserveRatio=true, smooth=true, backgroundLoading=true
+                /// Width=60, Height=60, preserveRatio=true, smooth=true,
+                /// backgroundLoading=true
                 Image thumbnail = new Image(imageFile.toURI().toString(), 60,
                         60, true, true,
                         true);

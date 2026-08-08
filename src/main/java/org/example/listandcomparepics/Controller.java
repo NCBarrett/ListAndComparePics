@@ -1,7 +1,5 @@
 package org.example.listandcomparepics;
 
-
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -22,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -88,11 +88,13 @@ public class Controller {
 
     @FXML public TitledPane BottomsPanel;
     @FXML public ComboBox<String> SceneCat;
+    @FXML public Label guidanceLabel;
 
     private DirectoryWatcherService watcherService;
     private DirectoryListingService listingService;
-
     private Path currentWatchDir;
+
+    private final List<ComboBox<String>> allColorComboBoxes = new ArrayList<>();
 
     // Additional storage mappings for your new layout categories
     private final Path styleFile = Path.of("saved_clothes_styles.txt");
@@ -122,7 +124,17 @@ public class Controller {
 
         /// Shared color dictionary loader (all color boxes pull from the same
         /// persistent file)
-        loadAndAssignColorSeries();
+//        loadAndAssignColorSeries();
+//        makeEditableAndPersistent(MainOnlyColor, colorsFile);
+//        makeEditableAndPersistent(MainColor2, colorsFile);
+//        makeEditableAndPersistent(MainColor3, colorsFile);
+//        makeEditableAndPersistent(MainColor4, colorsFile);
+//        makeEditableAndPersistent(MainColor5, colorsFile);
+//        makeEditableAndPersistent(BottomOnlyColor, colorsFile);
+//        makeEditableAndPersistent(BottomColor2, colorsFile);
+//        makeEditableAndPersistent(BottomColor3, colorsFile);
+//        makeEditableAndPersistent(BottomColor4, colorsFile);
+//        makeEditableAndPersistent(BottomColor5, colorsFile);
 
         EyeColor.getItems().setAll("Blue", "Black", "Brown", "Green", "Can't See");
         HairColor.getItems().setAll("Red", "Blond", "Brown", "Black");
@@ -252,6 +264,16 @@ public class Controller {
         rtFileListView.setCellFactory(param ->
                 new ImageThumbListCell(currentWatchDir));
 
+        allColorComboBoxes.addAll(List.of(
+            MainOnlyColor, MainColor2, MainColor3, MainColor4, MainColor5,
+            BottomOnlyColor, BottomColor2, BottomColor3, BottomColor4,
+                BottomColor5
+        ));
+
+        for (ComboBox<String> box : allColorComboBoxes) {
+            makeEditableAndPersistent(box, colorsFile);
+        }
+
         MainColor3.disableProperty().bind(TopColor3ChBox.selectedProperty().not());
         MainColor4.disableProperty().bind(TopColor4ChBox.selectedProperty().not());
         MainColor5.disableProperty().bind(TopColor5ChBox.selectedProperty().not());
@@ -344,7 +366,7 @@ public class Controller {
     }
 
     private void loadSavedTags(Path file, ComboBox<String> comboBox) {
-        // 1. Verify if the target configuration file exists on your disk
+        /// 1. Verify if the target configuration file exists on your disk
         if (Files.exists(file)) {
             try (Stream<String> lines = Files.lines(file)) {
                 // Read lines, strip out extra empty spacing, and collect valid entries
@@ -357,24 +379,32 @@ public class Controller {
                 System.out.println("Successfully loaded tags from file: " +
                         file.getFileName());
             } catch (IOException e) {
-                System.err.println("Could not read tag entries from " + file + ": " +
-                        e.getMessage());
+                System.err.println("Could not read tag entries from " + file +
+                        ": " + e.getMessage());
             }
         } else {
-            // 2. Fallback initialization defaults if the text files do not exist yet
+            /// 2. Fallback initialization defaults if the text files do not exist yet
             if (comboBox == BraSize) {
                 BraSize.getItems().setAll("M", "L", "XL", "XXL");
             }
             if (comboBox == ClothesType) {
-                ClothesType.getItems().setAll("Bikini", "Pants & Shirt", "Lingerie",
-                        "Other street clothes");
+                ClothesType.getItems().setAll("Bikini", "Pants & Shirt",
+                        "Lingerie", "Other street clothes");
             }
             if (comboBox == ClothesStyle) {
                 ClothesStyle.getItems().setAll("Top and Bottom Match",
                         "Top compliments Bottom", "Top Only");
             }
             if (comboBox == TopPatternType) {
-                BottomPatternType.getItems().setAll("Main with Compliments", "Simple");
+                BottomPatternType.getItems().setAll("Main with Compliments",
+                        "Simple");
+            }
+
+            /// 3. New: fallback for anything backed by colorsFile
+            if (file == colorsFile) {
+                comboBox.getItems().setAll("Black", "White", "Red", "Blue", "Green",
+                        "Yellow", "Orange", "Purple", "Pink", "Gold", "Silver",
+                        "Tan", "Brown", "Gray");
             }
         }
     }
@@ -387,7 +417,8 @@ public class Controller {
 
         if (matcher.find()) {
             idNumber = matcher.group(1); // Safely isolate the string of digits
-            GirlID.setValue(idNumber);   // Programmatically snap the ComboBox value to match
+            GirlID.setValue(idNumber);   // Programmatically snap the ComboBox
+                                         // value to match
         }
         return idNumber;
     }
@@ -465,9 +496,10 @@ public class Controller {
         var rtItems = listingService.getDirectoryListing(currentWatchDir, rightRaw,
                 true);
 
-        /// Custom Two-Tier Sort: Bubble "Animated" files up, then default to natural
-        /// compare
-        rtItems.removeIf(filename -> filename.toLowerCase().startsWith("animated"));
+        /// Custom Two-Tier Sort: Bubble "Animated" files up, then default to
+        /// natural compare
+        rtItems.removeIf(filename -> filename.toLowerCase().startsWith(
+                "animated"));
 
         rtItems.sort((file1, file2) ->
             DirectoryListingService.naturalCompare(file1, file2));
@@ -749,6 +781,8 @@ public class Controller {
                 System.out.println(tags.toString());
                 // Update the long preview TextField at the bottom of your window
                 tagString.setText(tags.toString());
+
+                updateGuidanceText();
             }
         }
     }
@@ -812,35 +846,6 @@ public class Controller {
         }
     }
 
-    // =================================================================
-    // 1. THE DEDICATED PERSISTENCE & ASSIGNMENT METHOD
-    // =================================================================
-    private void loadAndAssignColorSeries() {
-        List<String> loadedColors = java.util.Collections.emptyList();
-
-        // Read your single, master list of colors from disk
-        if (Files.exists(colorsFile)) {
-            try (Stream<String> lines = Files.lines(colorsFile)) {
-                loadedColors = lines.map(String::trim)
-                        .filter(line -> !line.isEmpty())
-                        .toList();
-            } catch (IOException e) {
-                System.err.println("Failed reading color references: " + e.getMessage());
-            }
-        }
-
-        // Assign that exact same master list of values to your primary inputs
-        MainOnlyColor.getItems().setAll(loadedColors);
-        BottomOnlyColor.getItems().setAll(loadedColors);
-
-        // Use your reflection loop to instantly update the rest of the series rows
-        // This populates MainColor2 through MainColor5 and BottomColor2 through BottomColor5
-        assignValuesToComboBoxGroup("MainColor", 2, 5, loadedColors);
-        assignValuesToComboBoxGroup("BottomColor", 2, 5, loadedColors);
-
-        System.out.println("Master color list successfully broadcasted to all dropdowns.");
-    }
-
     public void loadAllSavedTags() {
         loadSavedTags(styleFile, ClothesStyle);
         loadSavedTags(patternCatFile, TopPatternType);
@@ -860,38 +865,83 @@ public class Controller {
         loadSavedTags(colorsFile, BottomColor5);
     }
 
-    public void assignValuesToComboBoxGroup(String prefix, int startNum, int endNum,
-                                            List<String> itemsToAssign) {
-        int i = startNum;
+    private void makeEditableAndPersistent(ComboBox<String> comboBox, Path file) {
+        comboBox.setEditable(true);
 
-        while (i <= endNum) {
-            // 1. Construct the exact field identifier (e.g., "MainColor3")
-            String targetFieldName = prefix + i;
+        /// Commit on Enter (fires the ComboBox's onAction)
+        comboBox.setOnAction(event -> registerIfNew(comboBox, file));
 
-            try {
-                // 2. Locate the field securely, even while the UI is initializing
-                java.lang.reflect.Field field = this.getClass().getDeclaredField(targetFieldName);
-
-                // 3. Temporarily bypass access restrictions to grab the FXML injection instance
-                field.setAccessible(true);
-
-                @SuppressWarnings("unchecked")
-                ComboBox<String> comboBox = (ComboBox<String>) field.get(this);
-
-                if (comboBox != null) {
-                    // 4. Feed the custom series of values straight into the dropdown items list
-                    comboBox.getItems().setAll(itemsToAssign);
-                    System.out.println("Programmatically initialized values for: " + targetFieldName);
-                }
-
-            } catch (NoSuchFieldException e) {
-                System.err.println("Reflection Error: No variable found matching: " + targetFieldName);
-            } catch (IllegalAccessException e) {
-                System.err.println("Reflection Security Exception for field: " + targetFieldName);
+        /// Also commit if the user clicks away without pressing Enter
+        comboBox.focusedProperty().addListener((obs,
+                                                wasFocused,
+                                                isFocused) -> {
+            if (!isFocused) {
+                registerIfNew(comboBox, file);
             }
+        });
+    }
 
-            i++; // Increment step to evaluate the next box in the series
+    private void registerIfNew(ComboBox<String> comboBox, Path file) {
+        String typed = comboBox.getEditor().getText();
+        if (typed == null) return;
+        typed = typed.trim();
+        if (typed.isEmpty()) return;
+
+        if (!comboBox.getItems().contains(typed)) {
+            appendToFile(file, typed);
+            System.out.println("Saved new value \"" + typed + "\" to " +
+                    file.getFileName());
+
+            /// Broadcast to every color ComboBox in the shared group, not just
+            /// this one
+            if (file == colorsFile) {
+                for (ComboBox<String> box : allColorComboBoxes) {
+                    if (!box.getItems().contains(typed)) {
+                        box.getItems().add(typed);
+                    }
+                }
+            } else {
+                comboBox.getItems().add(typed);
+            }
         }
+        comboBox.setValue(typed);
+    }
+
+    private void appendToFile(Path file, String value) {
+        try {
+            Files.writeString(file, value + System.lineSeparator(),
+                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            System.err.println("Failed to save new tag value to " + file + ": " +
+                    e.getMessage());
+        }
+    }
+
+    private void updateGuidanceText() {
+        String message;
+
+        if (GirlID.getValue() == null || GirlID.getValue().isBlank()) {
+            message = "Start with the Girl ID — this drives auto-lookup of her traits.";
+        } else if (EyeColor.getValue() == null || EyeColor.getValue().isBlank()) {
+            message = "Confirm eye color (or leave as-is if auto-filled).";
+        } else if (HairColor.getValue() == null || HairColor.getValue().isBlank()) {
+            message = "Confirm hair color.";
+        } else if (BraSize.getValue() == null || BraSize.getValue().isBlank()) {
+            message = "Confirm bra size.";
+        } else if (TopPatternType.getValue() == null || TopPatternType.getValue().isBlank()) {
+            message = "Top panel: is it patterned, or a solid color?";
+        } else if (TopPatternType.getValue().equals("Main with Compliments")
+                && (TopPatternSubType.getValue() == null || TopPatternSubType.getValue().isBlank())) {
+            message = "What does the pattern most resemble — dots/figures, stripes, floral, plaid?";
+        } else if (MainOnlyColor.getValue() == null || MainOnlyColor.getValue().isBlank()) {
+            message = "List the top's colors, most prominent first.";
+        } else if (BottomPatternType.getValue() == null || BottomPatternType.getValue().isBlank()) {
+            message = "Bottom panel: is it patterned, or a solid color?";
+        } else {
+            message = "Core details look complete. Check strings/trim, then Scene.";
+        }
+
+        guidanceLabel.setText(message);
     }
 
 //    private void writeTagsToMetadata(File imageFile, String tagString) {
@@ -943,3 +993,65 @@ public class Controller {
     }
 }
 
+//    // =================================================================
+//    // 1. THE DEDICATED PERSISTENCE & ASSIGNMENT METHOD
+//    // =================================================================
+//    private void loadAndAssignColorSeries() {
+//        List<String> loadedColors = java.util.Collections.emptyList();
+//
+//        // Read your single, master list of colors from disk
+//        if (Files.exists(colorsFile)) {
+//            try (Stream<String> lines = Files.lines(colorsFile)) {
+//                loadedColors = lines.map(String::trim)
+//                        .filter(line -> !line.isEmpty())
+//                        .toList();
+//            } catch (IOException e) {
+//                System.err.println("Failed reading color references: " + e.getMessage());
+//            }
+//        }
+//
+//        // Assign that exact same master list of values to your primary inputs
+//        MainOnlyColor.getItems().setAll(loadedColors);
+//        BottomOnlyColor.getItems().setAll(loadedColors);
+//
+//        // Use your reflection loop to instantly update the rest of the series rows
+//        // This populates MainColor2 through MainColor5 and BottomColor2 through BottomColor5
+//        assignValuesToComboBoxGroup("MainColor", 2, 5, loadedColors);
+//        assignValuesToComboBoxGroup("BottomColor", 2, 5, loadedColors);
+//
+//        System.out.println("Master color list successfully broadcasted to all dropdowns.");
+//    }
+
+//public void assignValuesToComboBoxGroup(String prefix, int startNum, int endNum,
+//                                            List<String> itemsToAssign) {
+//        int i = startNum;
+//
+//        while (i <= endNum) {
+//            // 1. Construct the exact field identifier (e.g., "MainColor3")
+//            String targetFieldName = prefix + i;
+//
+//            try {
+//                // 2. Locate the field securely, even while the UI is initializing
+//                java.lang.reflect.Field field = this.getClass().getDeclaredField(targetFieldName);
+//
+//                // 3. Temporarily bypass access restrictions to grab the FXML injection instance
+//                field.setAccessible(true);
+//
+//                @SuppressWarnings("unchecked")
+//                ComboBox<String> comboBox = (ComboBox<String>) field.get(this);
+//
+//                if (comboBox != null) {
+//                    // 4. Feed the custom series of values straight into the dropdown items list
+//                    comboBox.getItems().setAll(itemsToAssign);
+//                    System.out.println("Programmatically initialized values for: " + targetFieldName);
+//                }
+//
+//            } catch (NoSuchFieldException e) {
+//                System.err.println("Reflection Error: No variable found matching: " + targetFieldName);
+//            } catch (IllegalAccessException e) {
+//                System.err.println("Reflection Security Exception for field: " + targetFieldName);
+//            }
+//
+//            i++; // Increment step to evaluate the next box in the series
+//        }
+//    }

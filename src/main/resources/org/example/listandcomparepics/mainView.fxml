@@ -273,6 +273,18 @@
                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
             </padding>
 
+            <TitledPane text="Tagging Guide" collapsible="true" expanded="true">
+                <VBox spacing="8">
+                    <padding>
+                        <Insets top="8" bottom="8" left="8" right="8"/>
+                    </padding>
+
+                    <Label fx:id="guidanceLabel"/>
+
+
+                </VBox>
+            </TitledPane>
+
             <TextField fx:id="tagString" promptText="Select a file and add attributes." prefWidth="700"/>
             <Button fx:id="submitBtn" text="Submit" onAction="#submitButton"/>
         </HBox>
