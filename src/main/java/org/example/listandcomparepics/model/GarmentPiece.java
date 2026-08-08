@@ -18,6 +18,20 @@ public class GarmentPiece {
     public List<Zone> zones = new ArrayList<>();
     public List<GarmentComponent> components = new ArrayList<>();
 
+    /// Free-text fallback for anything observed on this piece that the
+    /// current UI/fields can't yet capture structurally — e.g. a photo
+    /// has an Accent zone or an unusual component before that part of
+    /// the UI has been built. This lets tagging proceed on ALL photos
+    /// immediately, without needing to pre-sort which ones are "simple
+    /// enough" for whatever fields currently exist.
+    ///
+    /// Treat this as a queue: once the UI/model grows to cover a kind
+    /// of detail that's been piling up here in plain language, go back
+    /// through existing entries with non-empty rawNotes and convert the
+    /// relevant ones into proper structured fields (Zones, Components,
+    /// etc.), then clear or trim the note.
+    public String rawNotes;
+
     public GarmentPiece(PieceType pieceType) {
         this.pieceType = pieceType;
     }
