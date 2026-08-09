@@ -29,66 +29,77 @@ import java.util.stream.Stream;
 
 public class Controller {
 
+    // --- Directory / File Navigation ---
     @FXML public Button dirBrowser;
-    @FXML public Button submitBtn;
+    @FXML public HBox dirPane;
+    @FXML public Label dirChosen;
+    @FXML public ListView<String> fileListView = new ListView<>();
+    @FXML public ListView<String> rtFileListView = new ListView<>();
+    @FXML public ImageView imageViewer;
+    @FXML public StackPane imageContainer;
+    @FXML public TextField textRegEx;
+    @FXML public TextField rtTextRegEx;
 
-    @FXML public CheckBox BtmColor3ChBox;
-    @FXML public CheckBox BtmColor4ChBox;
-    @FXML public CheckBox BtmColor5ChBox;
-    @FXML public CheckBox TopColor3ChBox;
-    @FXML public CheckBox TopColor4ChBox;
-    @FXML public CheckBox TopColor5ChBox;    
-    
+    // --- Subject Profile (Girl ID, physical traits) ---
     @FXML public ComboBox<String> GirlID;
     @FXML public ComboBox<String> EyeColor;
     @FXML public ComboBox<String> HairColor;
     @FXML public ComboBox<String> BraSize;
+    @FXML public ToggleGroup profileModeGroup;
+    @FXML public RadioButton useExistingProfileRadio;
+    @FXML public RadioButton newProfileRadio;
+
+    // --- Clothes: shared / outfit-level ---
     @FXML public ComboBox<String> ClothesType;
     @FXML public ComboBox<String> ClothesStyle;
+
+    // --- Clothes: Top ---
     @FXML public ComboBox<String> TopPatternType;
+    @FXML public ComboBox<String> TopPatternSubType;
     @FXML public ComboBox<String> MainOnlyColor;
     @FXML public ComboBox<String> MainColor2;
     @FXML public ComboBox<String> MainColor3;
     @FXML public ComboBox<String> MainColor4;
     @FXML public ComboBox<String> MainColor5;
+    @FXML public CheckBox TopColor3ChBox;
+    @FXML public CheckBox TopColor4ChBox;
+    @FXML public CheckBox TopColor5ChBox;
+
+    // --- Clothes: Top, second layer ---
+    @FXML public CheckBox hasSecondTopLayerChBox;
+    @FXML public VBox secondTopLayerBox;
+    @FXML public ComboBox<String> secondLayerClothesType;
+    @FXML public ComboBox<String> secondLayerPatternType;
+    @FXML public ComboBox<String> secondLayerPatternSubType;
+    @FXML public ComboBox<String> secondLayerColor1;
+    @FXML public ComboBox<String> secondLayerColor2;
+
+    // --- Clothes: Bottom ---
     @FXML public ComboBox<String> BottomPatternType;
     @FXML public ComboBox<String> BottomPatternSubType;
     @FXML public ComboBox<String> BottomOnlyColor;
     @FXML public ComboBox<String> BottomColor2;
     @FXML public ComboBox<String> BottomColor3;
-    @FXML public ComboBox<String> BottomColor5;
     @FXML public ComboBox<String> BottomColor4;
+    @FXML public ComboBox<String> BottomColor5;
+    @FXML public CheckBox BtmColor3ChBox;
+    @FXML public CheckBox BtmColor4ChBox;
+    @FXML public CheckBox BtmColor5ChBox;
+    @FXML public TitledPane BottomsPanel;
+
+    // --- Scene ---
     @FXML public ComboBox<String> Scene;
-    @FXML public ComboBox<String> TopPatternSubType;
+    @FXML public ComboBox<String> SceneCat;
 
-    @FXML public HBox dirPane;
-
-    @FXML public ImageView imageViewer;
-
-    @FXML public Label dirChosen;
-
-    @FXML public ListView<String> fileListView = new ListView<>();
-    @FXML public ListView<String> rtFileListView = new ListView<>();
-
-    @FXML public StackPane imageContainer;
-
-    @FXML public TextField textRegEx;
-    @FXML public TextField rtTextRegEx;
-    @FXML public TextField RegEx;
-    @FXML public TextField RegEx2;
+    // --- Tag output / guidance ---
     @FXML public TextField tagString;
+    @FXML public Button submitBtn;
+    @FXML public Label guidanceLabel;
 
-    @FXML public ToggleGroup profileModeGroup;
-    @FXML public RadioButton useExistingProfileRadio;
-    @FXML public RadioButton newProfileRadio;
-
+    // --- Layout containers ---
     @FXML public VBox leftPane;
     @FXML public VBox rightPane;
     @FXML public VBox root;
-
-    @FXML public TitledPane BottomsPanel;
-    @FXML public ComboBox<String> SceneCat;
-    @FXML public Label guidanceLabel;
 
     private DirectoryWatcherService watcherService;
     private DirectoryListingService listingService;
@@ -249,6 +260,17 @@ public class Controller {
             // Pass the newly selected category name to our filter procedure
             updatePatternSubcategories(newValue);
         });
+
+        hasSecondTopLayerChBox.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+            secondTopLayerBox.setVisible(isSelected);
+            secondTopLayerBox.setManaged(isSelected);
+        });
+
+        secondLayerPatternType.getItems().setAll("Main with Compliments", "Simple");
+        makeEditableAndPersistent(secondLayerColor1, colorsFile);
+        makeEditableAndPersistent(secondLayerColor2, colorsFile);
+        allColorComboBoxes.add(secondLayerColor1);
+        allColorComboBoxes.add(secondLayerColor2);
 
         /// Search text listeners triggering reactive list filters
         textRegEx.textProperty().addListener((observable,
@@ -993,66 +1015,3 @@ public class Controller {
         watcherService.stopWatching();
     }
 }
-
-//    // =================================================================
-//    // 1. THE DEDICATED PERSISTENCE & ASSIGNMENT METHOD
-//    // =================================================================
-//    private void loadAndAssignColorSeries() {
-//        List<String> loadedColors = java.util.Collections.emptyList();
-//
-//        // Read your single, master list of colors from disk
-//        if (Files.exists(colorsFile)) {
-//            try (Stream<String> lines = Files.lines(colorsFile)) {
-//                loadedColors = lines.map(String::trim)
-//                        .filter(line -> !line.isEmpty())
-//                        .toList();
-//            } catch (IOException e) {
-//                System.err.println("Failed reading color references: " + e.getMessage());
-//            }
-//        }
-//
-//        // Assign that exact same master list of values to your primary inputs
-//        MainOnlyColor.getItems().setAll(loadedColors);
-//        BottomOnlyColor.getItems().setAll(loadedColors);
-//
-//        // Use your reflection loop to instantly update the rest of the series rows
-//        // This populates MainColor2 through MainColor5 and BottomColor2 through BottomColor5
-//        assignValuesToComboBoxGroup("MainColor", 2, 5, loadedColors);
-//        assignValuesToComboBoxGroup("BottomColor", 2, 5, loadedColors);
-//
-//        System.out.println("Master color list successfully broadcasted to all dropdowns.");
-//    }
-
-//public void assignValuesToComboBoxGroup(String prefix, int startNum, int endNum,
-//                                            List<String> itemsToAssign) {
-//        int i = startNum;
-//
-//        while (i <= endNum) {
-//            // 1. Construct the exact field identifier (e.g., "MainColor3")
-//            String targetFieldName = prefix + i;
-//
-//            try {
-//                // 2. Locate the field securely, even while the UI is initializing
-//                java.lang.reflect.Field field = this.getClass().getDeclaredField(targetFieldName);
-//
-//                // 3. Temporarily bypass access restrictions to grab the FXML injection instance
-//                field.setAccessible(true);
-//
-//                @SuppressWarnings("unchecked")
-//                ComboBox<String> comboBox = (ComboBox<String>) field.get(this);
-//
-//                if (comboBox != null) {
-//                    // 4. Feed the custom series of values straight into the dropdown items list
-//                    comboBox.getItems().setAll(itemsToAssign);
-//                    System.out.println("Programmatically initialized values for: " + targetFieldName);
-//                }
-//
-//            } catch (NoSuchFieldException e) {
-//                System.err.println("Reflection Error: No variable found matching: " + targetFieldName);
-//            } catch (IllegalAccessException e) {
-//                System.err.println("Reflection Security Exception for field: " + targetFieldName);
-//            }
-//
-//            i++; // Increment step to evaluate the next box in the series
-//        }
-//    }
