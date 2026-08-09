@@ -18,6 +18,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ScrollPane?>
 <VBox fx:id="root" xmlns:fx="http://javafx.com/fxml"
       fx:controller="org.example.listandcomparepics.Controller">
 
@@ -155,39 +156,43 @@
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                             </padding>
 
-                            <VBox>
-                                <!-- Top-Left Row: Category Pair -->
-                                <!-- alignment="CENTER_LEFT" keeps the label and
-                                    dropdown snapped to the left wall -->
-                                <HBox alignment="CENTER_LEFT" spacing="5">
-                                    <Label text="Pattern Type: "/>
-                                    <ComboBox fx:id="TopPatternType" editable="true"
-                                              prefWidth="150"/>
-                                </HBox>
-                                <!-- Bottom-Right Row: Subcategory Pair -->
-                                <!-- alignment="CENTER_RIGHT" forces the label and
-                                    dropdown to snap to the right wall -->
-                                <HBox alignment="CENTER_RIGHT" spacing="5">
-                                    <Label text="Pattern Subtype: "/>
-                                    <ComboBox fx:id="TopPatternSubType"
-                                              editable="true" prefWidth="150"/>
-                                </HBox>
+                            <ScrollPane fitToWidth="true" prefHeight="900"
+                                        VBox.vgrow="ALWAYS">
+                                <VBox spacing="10">
+                                    <!-- Top-Left Row: Category Pair -->
+                                    <!-- alignment="CENTER_LEFT" keeps the label and
+                                        dropdown snapped to the left wall -->
+                                    <HBox alignment="CENTER_LEFT" spacing="5">
+                                        <Label text="Pattern Type: "/>
+                                        <ComboBox fx:id="TopPatternType" editable="true"
+                                                  prefWidth="150"/>
+                                    </HBox>
+                                    <!-- Bottom-Right Row: Subcategory Pair -->
+                                    <!-- alignment="CENTER_RIGHT" forces the label and
+                                        dropdown to snap to the right wall -->
+                                    <HBox alignment="CENTER_RIGHT" spacing="5">
+                                        <Label text="Pattern Subtype: "/>
+                                        <ComboBox fx:id="TopPatternSubType"
+                                                  editable="true" prefWidth="150"/>
+                                    </HBox>
 
-                                <CheckBox fx:id="hasSecondTopLayerChBox" text="Second layer visible? (e.g. bikini top under an open shirt)"/>
+                                    <CheckBox fx:id="hasSecondTopLayerChBox" text="Second layer visible? (e.g. bikini top under an open shirt)"/>
 
-                                <VBox fx:id="secondTopLayerBox" spacing="10" visible="false" managed="false">
-                                    <Label text="Second layer type:"/>
-                                    <ComboBox fx:id="secondLayerClothesType" editable="true"/>
+                                    <VBox fx:id="secondTopLayerBox" spacing="10" visible="false" managed="false">
+                                        <Label text="Second layer type:"/>
+                                        <ComboBox fx:id="secondLayerClothesType" editable="true"/>
 
-                                    <Label text="Pattern:"/>
-                                    <ComboBox fx:id="secondLayerPatternType"/>
-                                    <ComboBox fx:id="secondLayerPatternSubType"/>
+                                        <Label text="Pattern:"/>
+                                        <ComboBox fx:id="secondLayerPatternType"/>
+                                        <ComboBox fx:id="secondLayerPatternSubType"/>
 
-                                    <Label text="Colors:"/>
-                                    <ComboBox fx:id="secondLayerColor1" editable="true"/>
-                                    <ComboBox fx:id="secondLayerColor2" editable="true"/>
+                                        <Label text="Colors:"/>
+                                        <ComboBox fx:id="secondLayerColor1" editable="true"/>
+                                        <ComboBox fx:id="secondLayerColor2" editable="true"/>
+                                    </VBox>
                                 </VBox>
-                            </VBox>
+                            </ScrollPane>
+
                             <HBox>
                                 <Label text="Main/Only Color: "/>
                                 <ComboBox fx:id="MainOnlyColor" editable="true"

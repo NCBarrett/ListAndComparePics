@@ -135,17 +135,6 @@ public class Controller {
 
         /// Shared color dictionary loader (all color boxes pull from the same
         /// persistent file)
-//        loadAndAssignColorSeries();
-//        makeEditableAndPersistent(MainOnlyColor, colorsFile);
-//        makeEditableAndPersistent(MainColor2, colorsFile);
-//        makeEditableAndPersistent(MainColor3, colorsFile);
-//        makeEditableAndPersistent(MainColor4, colorsFile);
-//        makeEditableAndPersistent(MainColor5, colorsFile);
-//        makeEditableAndPersistent(BottomOnlyColor, colorsFile);
-//        makeEditableAndPersistent(BottomColor2, colorsFile);
-//        makeEditableAndPersistent(BottomColor3, colorsFile);
-//        makeEditableAndPersistent(BottomColor4, colorsFile);
-//        makeEditableAndPersistent(BottomColor5, colorsFile);
 
         EyeColor.getItems().setAll("Blue", "Black", "Brown", "Green", "Can't See");
         HairColor.getItems().setAll("Red", "Blond", "Brown", "Black");
@@ -153,7 +142,6 @@ public class Controller {
 
         /// Load clothes details dropdowns
         loadClothesDetails();
-
 
         /// Left List Selection Listener
         fileListView.getSelectionModel().selectedItemProperty().addListener(
@@ -467,7 +455,7 @@ public class Controller {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            stage.sizeToScene();
+//            stage.sizeToScene();
         }
     }
 

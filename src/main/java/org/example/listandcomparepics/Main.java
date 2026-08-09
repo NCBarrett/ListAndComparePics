@@ -20,6 +20,7 @@ public class Main extends Application {
 
         stage.setTitle("List And Compare Pics");
         stage.setScene(scene);
+        stage.setMaxHeight(1000);
 
         stage.setOnCloseRequest((WindowEvent event) -> {
             controller.shutdown();});
