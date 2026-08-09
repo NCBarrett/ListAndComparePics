@@ -566,7 +566,8 @@ public class Controller {
                         "Floral",
                         "Other"
                 );
-                System.out.println("Loaded subcategories for Main with Compliments");
+                System.out.println(
+                        "Loaded subcategories for Main with Compliments");
             }
 
             // 3. Check if the user selected "Simple"
