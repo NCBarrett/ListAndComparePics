@@ -36,9 +36,12 @@ public class Controller {
     @FXML public ListView<String> fileListView = new ListView<>();
     @FXML public ListView<String> rtFileListView = new ListView<>();
     @FXML public ImageView imageViewer;
+    @FXML public RadioButton bikiniFolderRBtn;
+    @FXML public RadioButton browseBtn;
     @FXML public StackPane imageContainer;
     @FXML public TextField textRegEx;
     @FXML public TextField rtTextRegEx;
+    @FXML public ToggleGroup dirSourceGroup;
 
     // --- Subject Profile (Girl ID, physical traits) ---
     @FXML public ComboBox<String> GirlID;
@@ -101,11 +104,15 @@ public class Controller {
     @FXML public VBox rightPane;
     @FXML public VBox root;
 
+
     private DirectoryWatcherService watcherService;
     private DirectoryListingService listingService;
     private Path currentWatchDir;
 
     private final List<ComboBox<String>> allColorComboBoxes = new ArrayList<>();
+
+    private static final Path PICS_FOLDER = Path.of(
+            "C:\\Users\\barre\\'Porn Collection'\\");
 
     // Additional storage mappings for your new layout categories
     private final Path styleFile = Path.of("saved_clothes_styles.txt");
@@ -142,6 +149,17 @@ public class Controller {
 
         /// Load clothes details dropdowns
         loadClothesDetails();
+
+        dirSourceGroup.selectedToggleProperty().addListener((
+                ov, old_toggle,
+                new_toggle) -> {
+             if (new_toggle == bikiniFolderRBtn) {
+                 System.out.println("folder = " + PICS_FOLDER);
+                 openDirectory(PICS_FOLDER);
+             } else if (new_toggle == browseBtn) {
+                 onDirBrowserClick();
+             }
+        });
 
         /// Left List Selection Listener
         fileListView.getSelectionModel().selectedItemProperty().addListener(
@@ -437,6 +455,27 @@ public class Controller {
         this.stage = stage;
     }
 
+    private void openDirectory(Path dir) {
+        if (dir == null || !Files.isDirectory(dir)) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Folder Not Found");
+            alert.setContentText("Could not find: " + dir);
+            alert.showAndWait();
+            return;
+        }
+
+        dirChosen.setText(dir.toString());
+        currentWatchDir = dir;
+        refreshListView();
+
+        try{
+            watcherService.startWatching(currentWatchDir, this::refreshListView);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        stage.sizeToScene();
+    }
+
     @FXML
     private void onDirBrowserClick() {
         DirectoryChooser dirChooser = new DirectoryChooser();
@@ -444,18 +483,7 @@ public class Controller {
         File selectedDir = dirChooser.showDialog(stage);
 
         if (selectedDir != null) {
-            dirChosen.setText(selectedDir.getAbsolutePath());
-            currentWatchDir = selectedDir.toPath();
-
-            refreshListView(); // Initial listing load
-
-            try {
-                // Attach the background thread callback watcher system
-                watcherService.startWatching(currentWatchDir, this::refreshListView);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-//            stage.sizeToScene();
+            openDirectory(selectedDir.toPath());
         }
     }
 
