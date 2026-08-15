@@ -130,15 +130,15 @@
                 </HBox>
                 <Region prefWidth="50"/>
 
-                <TitledPane text="Tagging Guide" collapsible="true" expanded="true">
-                    <VBox spacing="8">
-                        <padding>
-                            <Insets top="8" bottom="8" left="8" right="8"/>
-                        </padding>
+<!--                <TitledPane text="Tagging Guide" collapsible="true" expanded="true">-->
+<!--                    <VBox spacing="8">-->
+<!--                        <padding>-->
+<!--                            <Insets top="8" bottom="8" left="8" right="8"/>-->
+<!--                        </padding>-->
 
-                        <Label fx:id="guidanceLabel"/>
-                    </VBox>
-                </TitledPane>
+<!--                        <Label fx:id="guidanceLabel"/>-->
+<!--                    </VBox>-->
+<!--                </TitledPane>-->
 
 
             </VBox>

@@ -22,7 +22,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -97,7 +99,7 @@ public class Controller {
     // --- Tag output / guidance ---
     @FXML public TextField tagString;
     @FXML public Button submitBtn;
-    @FXML public Label guidanceLabel;
+//    @FXML public Label guidanceLabel;
 
     // --- Layout containers ---
     @FXML public VBox leftPane;
@@ -119,6 +121,9 @@ public class Controller {
     private final Path patternCatFile = Path.of("saved_pattern_categories.txt");
     private final Path patternSubFile = Path.of("saved_pattern_subcategories.txt");
     private final Path colorsFile = Path.of("saved_discovered_colors.txt");
+    private final Path sceneFile = Path.of("saved_scenes.txt");
+
+    private Map<String, List<String>> sceneData;
 
     private Stage stage;
 
@@ -249,9 +254,32 @@ public class Controller {
             updateTagPreviewString();
         });
 
-        Scene.valueProperty().addListener((observable,
-                                           oldValue, newValue) -> {
-            updateTagPreviewString();
+        sceneData = loadHierarchicalTags(sceneFile);
+        if (sceneData.isEmpty()) {
+            sceneData.put("Outside", new ArrayList<>(List.of(
+                    "Pool", "Beach", "Other"
+            )));
+            sceneData.put("Indoors", new ArrayList<>(List.of(
+                    "Bedroom", "Kitchen", "Other"
+            )));
+        }
+        SceneCat.getItems().setAll(sceneData.keySet());
+
+        SceneCat.valueProperty().addListener((observable,
+                                              oldValue,newValue) -> {
+            if (isAutoUpdating) {
+                return;
+            }
+            updateSceneSubcategories(newValue);
+        });
+
+        Scene.setEditable(true);
+        Scene.setOnAction(event -> registerNewSceneIfNeeded());
+        Scene.focusedProperty().addListener((observable,
+                                             wasFocused, isFocused) -> {
+            if (!isFocused) {
+                registerNewSceneIfNeeded();
+            }
         });
 
         /// Listen for changes on the parent pattern category dropdown
@@ -821,7 +849,7 @@ public class Controller {
                 // Update the long preview TextField at the bottom of your window
                 tagString.setText(tags.toString());
 
-                updateGuidanceText();
+//                updateGuidanceText();
             }
         }
     }
@@ -956,33 +984,70 @@ public class Controller {
         }
     }
 
-    private void updateGuidanceText() {
-        String message;
 
-        if (GirlID.getValue() == null || GirlID.getValue().isBlank()) {
-            message = "Start with the Girl ID — this drives auto-lookup of her traits.";
-        } else if (EyeColor.getValue() == null || EyeColor.getValue().isBlank()) {
-            message = "Confirm eye color (or leave as-is if auto-filled).";
-        } else if (HairColor.getValue() == null || HairColor.getValue().isBlank()) {
-            message = "Confirm hair color.";
-        } else if (BraSize.getValue() == null || BraSize.getValue().isBlank()) {
-            message = "Confirm bra size.";
-        } else if (TopPatternType.getValue() == null || TopPatternType.getValue().isBlank()) {
-            message = "Top panel: is it patterned, or a solid color?";
-        } else if (TopPatternType.getValue().equals("Main with Compliments")
-                && (TopPatternSubType.getValue() == null || TopPatternSubType.getValue().isBlank())) {
-            message = "What does the pattern most resemble — dots/figures, stripes, floral, plaid?";
-        } else if (MainOnlyColor.getValue() == null || MainOnlyColor.getValue().isBlank()) {
-            message = "List the top's colors, most prominent first.";
-        } else if (BottomPatternType.getValue() == null || BottomPatternType.getValue().isBlank()) {
-            message = "Bottom panel: is it patterned, or a solid color?";
-        } else {
-            message = "Core details look complete. Check strings/trim, then Scene.";
+    private Map<String, List<String>> loadHierarchicalTags(Path file) {
+        Map<String, List<String>> result = new LinkedHashMap<>();
+
+        if (Files.exists(file)) {
+            try (Stream<String> lines = Files.lines(file)) {
+                for (String line : lines.toList()) {
+                    String[] parts = line.split(",", 2);
+                    if (parts.length == 2) {
+                        String category = parts[0].trim();
+                        String type = parts[1].trim();
+                        result.computeIfAbsent(category,
+                                k -> new ArrayList<>()).add(type);
+                    }
+                }
+            } catch (IOException e) {
+                System.err.println("Could not read hierarchical tags from " + file + ": " + e.getMessage());
+            }
         }
 
-        guidanceLabel.setText(message);
+        return result;
     }
 
+    private void updateSceneSubcategories(String category) {
+        Scene.getItems().clear();
+        Scene.setValue(null);
+        if (category != null && sceneData.containsKey(category.trim())) {
+            Scene.getItems().setAll(sceneData.get(category.trim()));
+        }
+    }
+
+    private void appendHierarchicalEntry(Path file, String category, String type) {
+        try {
+            Files.writeString(file, category + "," + type + System.lineSeparator(),
+                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            System.err.println("Failed to save entry: " +  e.getMessage());
+        }
+    }
+
+    private void registerNewSceneIfNeeded() {
+        String category = SceneCat.getValue();
+        String typed = Scene.getEditor().getText();
+        if (category == null || typed == null) return;
+
+        category = category.trim();
+        typed = typed.trim();
+        if (typed.isEmpty()) return;
+
+        List<String> existingTypes = sceneData.get(category);
+        if (existingTypes == null || !existingTypes.contains(typed)) {
+            sceneData.computeIfAbsent(category, k -> new ArrayList<>()).add(typed);
+            appendHierarchicalEntry(sceneFile, category, typed);
+            Scene.getItems().add(typed);
+            System.out.println("Saved new scene: \"" + typed + "\" under \"" +
+                    category + "\"");
+        }
+        Scene.setValue(typed);
+    }
+
+    public void shutdown() {
+        watcherService.stopWatching();
+    }
+}
 //    private void writeTagsToMetadata(File imageFile, String tagString) {
 //        try {
 //            TiffOutputSet outputSet;
@@ -1026,8 +1091,29 @@ public class Controller {
 //            alert.showAndWait();
 //        }
 //    }
-
-    public void shutdown() {
-        watcherService.stopWatching();
-    }
-}
+//    private void updateGuidanceText() {
+//        String message;
+//
+//        if (GirlID.getValue() == null || GirlID.getValue().isBlank()) {
+//            message = "Start with the Girl ID — this drives auto-lookup of her traits.";
+//        } else if (EyeColor.getValue() == null || EyeColor.getValue().isBlank()) {
+//            message = "Confirm eye color (or leave as-is if auto-filled).";
+//        } else if (HairColor.getValue() == null || HairColor.getValue().isBlank()) {
+//            message = "Confirm hair color.";
+//        } else if (BraSize.getValue() == null || BraSize.getValue().isBlank()) {
+//            message = "Confirm bra size.";
+//        } else if (TopPatternType.getValue() == null || TopPatternType.getValue().isBlank()) {
+//            message = "Top panel: is it patterned, or a solid color?";
+//        } else if (TopPatternType.getValue().equals("Main with Compliments")
+//                && (TopPatternSubType.getValue() == null || TopPatternSubType.getValue().isBlank())) {
+//            message = "What does the pattern most resemble — dots/figures, stripes, floral, plaid?";
+//        } else if (MainOnlyColor.getValue() == null || MainOnlyColor.getValue().isBlank()) {
+//            message = "List the top's colors, most prominent first.";
+//        } else if (BottomPatternType.getValue() == null || BottomPatternType.getValue().isBlank()) {
+//            message = "Bottom panel: is it patterned, or a solid color?";
+//        } else {
+//            message = "Core details look complete. Check strings/trim, then Scene.";
+//        }
+//
+//        guidanceLabel.setText(message);
+//    }
